@@ -17,6 +17,20 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Use signing config if a release keystore exists or env vars are provided in CI
+            signingConfig signingConfigs.release
+        }
+    }
+
+    signingConfigs {
+        release {
+            def ks = rootProject.file("release.keystore")
+            if (ks.exists()) {
+                storeFile ks
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD') ?: ''
+                keyAlias System.getenv('ANDROID_KEY_ALIAS') ?: ''
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD') ?: ''
+            }
         }
     }
 }
