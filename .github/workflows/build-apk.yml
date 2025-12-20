@@ -75,6 +75,20 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           set -euo pipefail
+          # If passwords were stored base64-encoded, decode them for Gradle
+          if [ -n "${ANDROID_KEYSTORE_PASSWORD:-}" ]; then
+            if echo "$ANDROID_KEYSTORE_PASSWORD" | grep -Eq '^[A-Za-z0-9+/]+=*$'; then
+              ANDROID_KEYSTORE_PASSWORD_DECODED=$(echo "$ANDROID_KEYSTORE_PASSWORD" | base64 --decode || true)
+              export ANDROID_KEYSTORE_PASSWORD="$ANDROID_KEYSTORE_PASSWORD_DECODED"
+            fi
+          fi
+          if [ -n "${ANDROID_KEY_PASSWORD:-}" ]; then
+            if echo "$ANDROID_KEY_PASSWORD" | grep -Eq '^[A-Za-z0-9+/]+=*$'; then
+              ANDROID_KEY_PASSWORD_DECODED=$(echo "$ANDROID_KEY_PASSWORD" | base64 --decode || true)
+              export ANDROID_KEY_PASSWORD="$ANDROID_KEY_PASSWORD_DECODED"
+            fi
+          fi
+
           if [ -f release.keystore ]; then
             echo "Running release build (keystore found)"
             ./gradlew assembleRelease --no-daemon
