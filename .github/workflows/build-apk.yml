@@ -1,0 +1,56 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build debug APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Install Android SDK command-line tools and platforms
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y unzip curl
+          SDK_ROOT="$HOME/android-sdk"
+          mkdir -p "$SDK_ROOT/cmdline-tools"
+          curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -o cmdline-tools.zip
+          unzip -q cmdline-tools.zip -d "$SDK_ROOT/cmdline-tools"
+          yes | "$SDK_ROOT/cmdline-tools/cmdline-tools/bin/sdkmanager" --sdk_root="$SDK_ROOT" "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> $GITHUB_ENV
+          echo "$SDK_ROOT/platform-tools" >> $GITHUB_PATH
+
+      - name: Ensure Gradle wrapper
+        run: |
+          set -euo pipefail
+          chmod +x scripts/sync_assets.sh || true
+          if [ ! -f ./gradlew ]; then
+            curl -sLo gradle.zip https://services.gradle.org/distributions/gradle-7.5.1-bin.zip
+            unzip -q gradle.zip -d gradle
+            export PATH="$PWD/gradle/gradle-7.5.1/bin:$PATH"
+            gradle wrapper --gradle-version 7.5.1
+          fi
+
+      - name: Sync assets into app
+        run: bash scripts/sync_assets.sh
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-debug
+          path: app/build/outputs/apk/**/*.apk
