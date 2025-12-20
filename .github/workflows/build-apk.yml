@@ -28,7 +28,15 @@ jobs:
           mkdir -p "$SDK_ROOT/cmdline-tools"
           curl -sSL https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -o cmdline-tools.zip
           unzip -q cmdline-tools.zip -d "$SDK_ROOT/cmdline-tools"
-          yes | "$SDK_ROOT/cmdline-tools/cmdline-tools/bin/sdkmanager" --sdk_root="$SDK_ROOT" "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+          # move into recommended layout
+          if [ -d "$SDK_ROOT/cmdline-tools/cmdline-tools" ]; then
+            mv "$SDK_ROOT/cmdline-tools/cmdline-tools" "$SDK_ROOT/cmdline-tools/latest"
+          fi
+          SDKMANAGER="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          # Accept licenses non-interactively
+          yes | "$SDKMANAGER" --sdk_root="$SDK_ROOT" --licenses || true
+          # Install required packages
+          "$SDKMANAGER" --sdk_root="$SDK_ROOT" "platform-tools" "platforms;android-33" "build-tools;33.0.2"
           echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> $GITHUB_ENV
           echo "$SDK_ROOT/platform-tools" >> $GITHUB_PATH
 
