@@ -56,21 +56,31 @@ jobs:
         run: ./gradlew assembleDebug --no-daemon
 
       - name: Restore release keystore (from Secrets)
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
           set -euo pipefail
-          echo "$KEYSTORE_B64" | base64 --decode > release.keystore
-          chmod 600 release.keystore
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "Restoring release keystore from secret"
+            echo "$KEYSTORE_B64" | base64 --decode > release.keystore
+            chmod 600 release.keystore
+          else
+            echo "ANDROID_KEYSTORE_BASE64 secret is empty — skipping keystore restore"
+          fi
 
       - name: Build release APK (signed)
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew assembleRelease --no-daemon
+        run: |
+          set -euo pipefail
+          if [ -f release.keystore ]; then
+            echo "Running release build (keystore found)"
+            ./gradlew assembleRelease --no-daemon
+          else
+            echo "release.keystore not found — skipping signed release build"
+          fi
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
