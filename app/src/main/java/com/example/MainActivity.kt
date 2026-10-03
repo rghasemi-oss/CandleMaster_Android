@@ -26,7 +26,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MyApplicationTheme {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val themePreferences = remember { com.example.data.ThemePreferences(context) }
+            val isDarkMode by themePreferences.isDarkModeFlow.collectAsStateWithLifecycle(initialValue = true)
+
+            MyApplicationTheme(darkTheme = isDarkMode) {
                 val viewModel: NdnViewModel = viewModel()
                 var currentScreen by remember { mutableStateOf(NdnScreen.LOGIN) }
 

@@ -6,6 +6,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,7 +17,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.data.ThemePreferences
 import com.example.data.remote.ConfigPreferences
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,11 +29,15 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val configPrefs = remember { ConfigPreferences(context) }
+    val themePreferences = remember { ThemePreferences(context) }
+    val coroutineScope = rememberCoroutineScope()
 
     var supabaseUrl by remember { mutableStateOf(configPrefs.supabaseUrl) }
     var supabaseKey by remember { mutableStateOf(configPrefs.supabaseKey) }
     var renderUrl by remember { mutableStateOf(configPrefs.renderBackendUrl) }
     var showSavedMessage by remember { mutableStateOf(false) }
+
+    val isDarkMode by themePreferences.isDarkModeFlow.collectAsStateWithLifecycle(initialValue = true)
 
     val goldColor = Color(0xFFE5B83B)
     val cardBg = Color(0xFF1D1E24)
@@ -40,7 +48,7 @@ fun SettingsScreen(
             TopAppBar(
                 title = {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Text("تنظیمات اتصال واقعی Supabase و Render", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Text("تنظیمات و شخصی‌سازی برنامه", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 },
                 navigationIcon = {
@@ -60,6 +68,45 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // Theme Switcher Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = cardBg),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(Icons.Default.DarkMode, contentDescription = null, tint = goldColor)
+                        Column {
+                            Text("حالت تاریک / روشن (Dark Mode)", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                            Text("تغییر تم برنامه و ذخیره خودکار در DataStore", color = Color.Gray, fontSize = 11.sp)
+                        }
+                    }
+                    Switch(
+                        checked = isDarkMode,
+                        onCheckedChange = { checked ->
+                            coroutineScope.launch {
+                                themePreferences.setDarkMode(checked)
+                            }
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = goldColor,
+                            checkedTrackColor = Color(0xFF2E271B)
+                        )
+                    )
+                }
+            }
+
+            // Connection Configuration Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = cardBg),
@@ -71,10 +118,10 @@ fun SettingsScreen(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Icon(Icons.Default.Cloud, contentDescription = null, tint = goldColor)
-                        Text("پیکربندی اتصال واقعی (بدون داده‌های فرضی)", color = goldColor, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text("پیکربندی اتصال واقعی (Supabase & Render)", color = goldColor, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                     }
                     Text(
-                        "لطفاً آدرس پروژه Supabase، کلید Anon و همچنین آدرس سرور مستقر شده خود روی Render.com را وارد کنید تا ارتباط برنامه کاملاً واقعی برقرار شود.",
+                        "لطفاً آدرس پروژه Supabase، کلید Anon و آدرس سرور مستقر شده روی Render.com را وارد کنید.",
                         color = Color.Gray,
                         fontSize = 12.sp
                     )
@@ -82,7 +129,7 @@ fun SettingsScreen(
                     OutlinedTextField(
                         value = supabaseUrl,
                         onValueChange = { supabaseUrl = it },
-                        label = { Text("Supabase Project URL (e.g. https://xyz.supabase.co)") },
+                        label = { Text("Supabase Project URL") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -98,7 +145,7 @@ fun SettingsScreen(
                     OutlinedTextField(
                         value = renderUrl,
                         onValueChange = { renderUrl = it },
-                        label = { Text("Render.com Backend URL (e.g. https://ndn-api.onrender.com)") },
+                        label = { Text("Render.com Backend URL") },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -123,7 +170,7 @@ fun SettingsScreen(
 
                     if (showSavedMessage) {
                         Text(
-                            "تنظیمات با موفقیت ذخیره شد و از این پس ارتباط مستقیماً با سرور واقعی برقرار می‌شود.",
+                            "تنظیمات با موفقیت ذخیره شد.",
                             color = Color(0xFF4CAF50),
                             fontSize = 12.sp
                         )
