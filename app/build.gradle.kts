@@ -6,6 +6,7 @@ plugins {
   alias(libs.plugins.google.devtools.ksp)
   alias(libs.plugins.secrets)
   alias(libs.plugins.google.services)
+  kotlin("plugin.serialization") version "2.1.0"
 }
 
 android {
@@ -119,6 +120,8 @@ dependencies {
   implementation(libs.okhttp)
   // implementation(libs.play.services.location)
   implementation(libs.retrofit)
+  implementation("com.squareup.retrofit2:converter-kotlinx-serialization:2.11.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
   testImplementation(libs.androidx.compose.ui.test.junit4)
   testImplementation(libs.androidx.core)
   testImplementation(libs.androidx.junit)
