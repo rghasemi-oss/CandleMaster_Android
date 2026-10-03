@@ -1,0 +1,6 @@
+{
+  "name": "NDN Delivery",
+  "description": "NDN Neighborhood Delivery & Logistics Network with PUDO, Hub, and Customer Panels",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
