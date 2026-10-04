@@ -15,34 +15,49 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v5 # ارتقا به نسخه ۵ برای رفع هشدارهای گیت‌هاب
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '17'
+        java-version: '21'
         cache: 'gradle'
 
-    - name: Make script executable
-      run: chmod +x scripts/sync_assets.sh
-      continue-on-error: true
-
-    - name: Sync Assets (Run custom script)
+    - name: Find Gradle Directory and Build APK
       run: |
-        # ساخت دسته‌جمعی پوشه‌های مورد نیاز برای جلوگیری از ارور اسکریپت
+        # پیدا کردن پوشه‌ای که فایل gradlew در آن قرار دارد
+        GRADLE_DIR=$(find . -name "gradlew" -exec dirname {} \;)
+        
+        if [ -z "$GRADLE_DIR" ]; then
+          echo "❌ Error: Could not find gradlew anywhere in the repository!"
+          exit 1
+        fi
+        
+        echo "✅ Found Gradle project in: $GRADLE_DIR"
+        cd "$GRADLE_DIR"
+        
+        # اجرای اسکریپت جابه‌جایی دارایی‌ها در صورت وجود
+        if [ -f "./scripts/sync_assets.sh" ]; then
+          chmod +x ./scripts/sync_assets.sh
+          ./scripts/sync_assets.sh || true
+        elif [ -f "../scripts/sync_assets.sh" ]; then
+          chmod +x ../scripts/sync_assets.sh
+          ../scripts/sync_assets.sh || true
+        fi
+        
+        # ساخت پوشه‌های ضروری جهت اطمینان
         mkdir -p app/src/main/assets
         mkdir -p app/src/main/res/raw
-        # اجرای اسکریپت به صورتی که کل پروسه را خراب نکند
-        ./scripts/sync_assets.sh || true
-      continue-on-error: true
-
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-
-    - name: Build Debug APK with Gradle
-      run: ./gradlew assembleDebug --no-daemon
+        
+        # مجوز دادن به گرادل و ساخت فایل نصب
+        chmod +x gradlew
+        ./gradlew assembleDebug --no-daemon
+        
+        # انتقال فایل APK ساخته شده به ریشه اصلی برای آپلود راحت‌تر
+        mkdir -p $GITHUB_WORKSPACE/output_apk
+        cp app/build/outputs/apk/debug/app-debug.apk $GITHUB_WORKSPACE/output_apk/CandleMaster.apk
 
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
       with:
         name: CandleMaster-Debug-APK
-        path: app/build/outputs/apk/debug/app-debug.apk
+        path: output_apk/CandleMaster.apk
