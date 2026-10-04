@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سیستم یکپارچه توزیع NDN</title>
-    <link rel="manifest" href="./app_manifest.json?v=10">
+    <link rel="manifest" href="./app_manifest.json?v=11">
     <link rel="icon" type="image/png" href="https://icons8.com">
     <style>
         :root {
@@ -191,7 +191,7 @@
     </div>
 
     <div class="main-wrapper">
-        <!-- فرم ورود (تمامی هندلرهای اینلاین حذف شدند) -->
+        <!-- فرم ورود -->
         <div id="auth-section" class="auth-container">
             <h2>ورود به سیستم توزیع NDN</h2>
             <div id="auth-alert" class="alert"></div>
@@ -204,7 +204,8 @@
                 <label>کلمه عبور</label>
                 <input type="password" id="auth-password" placeholder="رمز عبور">
             </div>
-            <button type="button" id="btn-submit-login" class="btn">ورود به پنل کاربری</button>
+            <!-- اضافه شدن مستقیم تابع برای اطمینان از کلیک شدن در هر شرایطی -->
+            <button type="button" id="btn-submit-login" class="btn" onclick="globalLoginTrigger()">ورود به پنل کاربری</button>
 
             <div class="info-tip">
                 💡 <b>مشخصات ورود ادمین برای تست:</b><br>
@@ -242,7 +243,7 @@
                         <button id="btn-admin-submit" class="btn">صدور بارنامه و ذخیره</button>
                     </div>
 
-                    <!-- بخش ابزار ویژه ادمین برای ورود با هویت کاربران موجود (Impersonation) -->
+                    <!-- بخش ابزار ورود با هویت کاربران موجود (Impersonation) -->
                     <div class="sub-card" style="border-right: 4px solid var(--admin-color);">
                         <h3 style="color:var(--admin-color); margin-top:0;">🛠️ شبیه‌ساز ورود با نقش کاربران</h3>
                         <p style="font-size:12px; color:var(--text-muted);">یک کاربر هدف را انتخاب کنید تا بدون داشتن پسورد، وارد پنل او شده و عملکرد و دسترسی‌های وی را تست کنید.</p>
@@ -264,4 +265,3 @@
 
             <!-- ۲. نمای پنل راننده (Driver View) -->
             <div id="view-driver" class="panel-view">
-                <div class="sub-card" style="border-top: 3px solid var(--driver-color);">
