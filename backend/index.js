@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
+const ws = require('ws'); // ماژول وب‌ساکت برای رفع ارور رندر
 
 const app = express();
 app.use(cors());
@@ -15,7 +16,15 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.error("❌ Error: SUPABASE_URL and Supabase Key must be defined in environment variables!");
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+// ساخت کلاینت سوپابیس به همراه پیکربندی وب‌ساکت و غیرفعال‌سازی سشن سروری
+const supabase = createClient(SUPABASE_URL || '', SUPABASE_KEY || '', {
+    auth: {
+        persistSession: false // بهینه‌سازی شده برای محیط‌های سروری مثل رندر
+    },
+    realtime: {
+        transport: ws // رفع خطای نبود نیتو وب‌ساکت در نود ۲۰
+    }
+});
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -25,6 +34,13 @@ app.get('/', (req, res) => {
 // Test Supabase Database Connection Endpoint
 app.get('/api/test-db', async (req, res) => {
     try {
+        if (!SUPABASE_URL || !SUPABASE_KEY) {
+            return res.status(500).json({
+                success: false,
+                message: 'Supabase environment variables are missing on the server.'
+            });
+        }
+
         // Query the deliveries table (or a lightweight test query)
         const { data, error, count } = await supabase
             .from('deliveries')
