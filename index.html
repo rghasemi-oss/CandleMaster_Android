@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سیستم یکپارچه توزیع NDN</title>
-    <link rel="manifest" href="./app_manifest.json?v=11">
+    <link rel="manifest" href="./app_manifest.json?v=12">
     <link rel="icon" type="image/png" href="https://icons8.com">
     <style>
         :root {
@@ -204,7 +204,6 @@
                 <label>کلمه عبور</label>
                 <input type="password" id="auth-password" placeholder="رمز عبور">
             </div>
-            <!-- اضافه شدن مستقیم تابع برای اطمینان از کلیک شدن در هر شرایطی -->
             <button type="button" id="btn-submit-login" class="btn" onclick="globalLoginTrigger()">ورود به پنل کاربری</button>
 
             <div class="info-tip">
@@ -265,3 +264,4 @@
 
             <!-- ۲. نمای پنل راننده (Driver View) -->
             <div id="view-driver" class="panel-view">
+                <div class="sub-card" style="border-top: 3px solid var(--driver-color);">
