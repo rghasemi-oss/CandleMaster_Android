@@ -20,7 +20,6 @@
             --error: #e74c3c;
             --admin-color: #9b59b6;
             --driver-color: #3498db;
-            --impersonate-bg: #7f8c8d;
         }
 
         body {
@@ -97,12 +96,13 @@
         .btn:hover { background-color: var(--accent-hover); }
 
         .alert {
-            padding: 10px;
-            border-radius: 6px;
+            padding: 12px;
+            border-radius: 8px;
             margin-bottom: 15px;
             font-size: 13px;
             display: none;
             text-align: center;
+            font-weight: bold;
         }
 
         .nav-bar {
@@ -121,12 +121,11 @@
             font-weight: bold;
         }
 
-        /* نوار بالای صفحه ویژه تست حالت Impersonation ادمین */
         .impersonation-banner {
             background-color: var(--error);
             color: white;
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
             font-size: 14px;
             font-weight: bold;
@@ -137,11 +136,12 @@
             background: white;
             color: var(--error);
             border: none;
-            padding: 3px 10px;
+            padding: 4px 12px;
             margin-right: 15px;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
+            font-family: inherit;
         }
 
         .grid {
@@ -160,7 +160,6 @@
         }
 
         .panel-view { display: none; }
-        .panel-view.active { display: block; }
 
         .logout-btn {
             background: transparent;
@@ -169,6 +168,17 @@
             padding: 6px 12px;
             border-radius: 6px;
             cursor: pointer;
+            font-family: inherit;
+        }
+        .info-tip {
+            font-size: 12px;
+            color: var(--text-muted);
+            background: rgba(229, 184, 59, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            border-right: 3px solid var(--accent);
+            margin-top: 15px;
+            line-height: 1.6;
         }
     </style>
 </head>
@@ -188,15 +198,21 @@
             
             <form onsubmit="handleAuth(event)">
                 <div class="form-group">
-                    <label>آدرس ایمیل</label>
+                    <label>آدرس ایمیل ادمین</label>
                     <input type="email" id="auth-email" required placeholder="admin@ndn.com">
                 </div>
                 <div class="form-group">
                     <label>کلمه عبور</label>
-                    <input type="password" id="auth-password" required placeholder="رمز عبور: 123456">
+                    <input type="password" id="auth-password" required placeholder="رمز عبور">
                 </div>
                 <button type="submit" class="btn">ورود به پنل کاربری</button>
             </form>
+
+            <div class="info-tip">
+                💡 <b>مشخصات ورود ادمین برای تست:</b><br>
+                ایمیل ادمین: <code style="color:var(--accent)">admin@ndn.com</code><br>
+                رمز عبور: <code>123456</code>
+            </div>
         </div>
 
         <!-- داشبورد اصلی -->
@@ -216,7 +232,7 @@
             <div id="view-admin" class="panel-view">
                 <div class="grid">
                     <div class="sub-card">
-                        <h3 style="margin-top:0;">ثبت و صدور بارنامه جدید</h3>
+                        <h3 style="margin-top:0;"><i class="fas fa-file-invoice"></i> ثبت و صدور بارنامه جدید</h3>
                         <div class="form-group">
                             <label>نام فرستنده</label>
                             <input type="text" id="adm-sender" placeholder="نام فروشگاه">
@@ -225,24 +241,24 @@
                             <label>نام مشتری (گیرنده)</label>
                             <input type="text" id="adm-customer" placeholder="نام خریدار">
                         </div>
-                        <button class="btn" onclick="adminSubmit()">صدور بارنامه</button>
+                        <button class="btn" onclick="adminSubmit()">صدور بارنامه و ذخیره</button>
                     </div>
 
                     <!-- بخش ابزار ویژه ادمین برای ورود با هویت کاربران موجود جهت تست عملکرد -->
                     <div class="sub-card" style="border-right: 4px solid var(--admin-color);">
                         <h3 style="color:var(--admin-color); margin-top:0;">🛠️ شبیه‌ساز ورود با نقش کاربران</h3>
-                        <p style="font-size:12px; color:var(--text-muted);">یک کاربر موجود در سیستم را انتخاب یا بنویسید تا بدون داشتن رمز عبور، وارد پنل او شده و عملکرد و ویوهای او را برای تست عیب‌یابی بررسی کنید.</p>
+                        <p style="font-size:12px; color:var(--text-muted);">یک کاربر هدف را انتخاب کنید تا بدون داشتن پسورد، وارد پنل او شده و عملکرد و دسترسی‌های وی را تست کنید.</p>
                         
                         <div class="form-group">
-                            <label>انتخاب نقش یا ایمیل کاربر هدف برای تست</label>
+                            <label>انتخاب حساب کاربر فرضی برای بررسی عملکرد</label>
                             <select id="impersonate-target">
-                                <option value="driver@ndn.com|driver">راننده شماره ۱ (driver@ndn.com)</option>
-                                <option value="driver2@ndn.com|driver">راننده شماره ۲ (driver2@ndn.com)</option>
-                                <option value="reza_customer@gmail.com|customer">مشتری خریدار (reza_customer@gmail.com)</option>
+                                <option value="driver1@ndn.com|driver">پیک موتوری هاب شماره ۱ (driver1@ndn.com)</option>
+                                <option value="driver2@ndn.com|driver">راننده توزیع سنگین (driver2@ndn.com)</option>
+                                <option value="customer_test@gmail.com|customer">خریدار نهایی مرسوله (customer_test@gmail.com)</option>
                             </select>
                         </div>
                         <button class="btn" style="background-color:var(--admin-color); color:white;" onclick="startImpersonation()">
-                            🚀 ورود به جای کاربر فوق و بررسی ویو
+                            🚀 ورود به جای کاربر و بررسی دسترسی‌ها
                         </button>
                     </div>
                 </div>
@@ -251,8 +267,3 @@
             <!-- ۲. نمای پنل راننده (Driver View) -->
             <div id="view-driver" class="panel-view">
                 <div class="sub-card" style="border-top: 3px solid var(--driver-color);">
-                    <h3 style="color:var(--driver-color); margin-top:0;">📋 لیست توزیع و مأموریت‌های پیک</h3>
-                    <p style="font-size:13px;">تست دسترسی: شما به عنوان راننده مجاز به تغییر وضعیت توزیع مرسولات تخصیص یافته به خود هستید.</p>
-                    <div style="background:#1a1a1a; padding:15px; border-radius:8px; display:flex; justify-content:between; align-items:center; border:1px solid #333;">
-                        <div style="flex-grow:1;">
-                            <b>مرسوله: TRK-9950</b><br>
