@@ -199,7 +199,7 @@
             <form onsubmit="handleAuth(event)">
                 <div class="form-group">
                     <label>آدرس ایمیل ادمین</label>
-                    <input type="email" id="auth-email" required placeholder="admin@ndn.com">
+                    <input type="email" id="auth-email" required placeholder="admin@ndn.com" value="admin@ndn.com">
                 </div>
                 <div class="form-group">
                     <label>کلمه عبور</label>
@@ -252,9 +252,9 @@
                         <div class="form-group">
                             <label>انتخاب حساب کاربر فرضی برای بررسی عملکرد</label>
                             <select id="impersonate-target">
-                                <option value="driver1@ndn.com|driver">پیک موتوری هاب شماره ۱ (driver1@ndn.com)</option>
-                                <option value="driver2@ndn.com|driver">راننده توزیع سنگین (driver2@ndn.com)</option>
-                                <option value="customer_test@gmail.com|customer">خریدار نهایی مرسوله (customer_test@gmail.com)</option>
+                                <option value="driver1@ndn.com">پیک موتوری هاب شماره ۱ (driver1@ndn.com)</option>
+                                <option value="driver2@ndn.com">راننده توزیع سنگین (driver2@ndn.com)</option>
+                                <option value="customer_test@gmail.com">خریدار نهایی مرسوله (customer_test@gmail.com)</option>
                             </select>
                         </div>
                         <button class="btn" style="background-color:var(--admin-color); color:white;" onclick="startImpersonation()">
