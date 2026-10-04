@@ -6,16 +6,5 @@
   "background_color": "#121212",
   "theme_color": "#E5B83B",
   "description": "شبکه تحویل مطمئن محله - PUDO, Hub and Customer Delivery Management System",
-  "icons": [
-    {
-      "src": "https://icons8.com",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://icons8.com",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+  "icons": []
 }
