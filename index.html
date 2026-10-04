@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>شبکه توزیع NDN</title>
-    <link rel="manifest" href="./manifest.json?v=3">
+    <!-- اتصال به مانیفست جدید برای شکستن کش مرورگر -->
+    <link rel="manifest" href="./app_manifest.json">
     <link rel="icon" type="image/png" href="https://icons8.com">
     <link rel="stylesheet" href="https://cloudflare.com">
     <style>
@@ -95,7 +96,7 @@
             <div id="status-container">
                 <div class="status-badge"><i class="fas fa-spinner fa-spin"></i> در حال بررسی اتصال...</div>
             </div>
-            <button class="btn" style="background-color: #333; color: white;" onclick="checkConnection()">
+            <button class="btn" style="background-color: #333; color: white;" onclick="checkRealConnection()">
                 <i class="fas fa-sync-alt"></i> بروزرسانی وضعیت اتصال
             </button>
         </div>
@@ -128,16 +129,15 @@
     </div>
 
     <script>
-        // آدرس دقیق سرور رندر شما
-        const SERVER_URL = 'https://onrender.com';
+        // آدرس دقیق سرور رندر اختصاصی شما
+        const MY_SERVER_URL = 'https://candlemaster-android.onrender.com';
 
-        // ۱. بررسی وضعیت اتصال
-        async function checkConnection() {
+        async function checkRealConnection() {
             const container = document.getElementById('status-container');
             container.innerHTML = '<div class="status-badge"><i class="fas fa-spinner fa-spin"></i> در حال بررسی...</div>';
             
             try {
-                const response = await fetch(SERVER_URL, { method: 'GET', mode: 'cors' });
+                const response = await fetch(MY_SERVER_URL, { method: 'GET', mode: 'cors' });
                 const data = await response.json();
                 
                 if(data.status === 'online' || data.supabase_status) {
@@ -148,48 +148,36 @@
                     `;
                 }
             } catch (error) {
-                console.error("Connection error:", error);
+                console.error("Fetch Error:", error);
                 container.innerHTML = `
                     <div class="status-badge" style="color: #e74c3c; background: rgba(231, 76, 60, 0.1);">
-                        <i class="fas fa-times-circle"></i> خطا در اتصال به سرور (بک‌اند در حال راه‌اندازی است)
+                        <i class="fas fa-times-circle"></i> خطا در اتصال به سرور (بک‌اند در حال بیدار شدن است)
                     </div>
                 `;
             }
         }
 
-        // ۲. ردیابی مرسوله
         function trackDelivery() {
             const id = document.getElementById('track-id').value;
             const resultBox = document.getElementById('track-result');
-            
-            if(!id) {
-                alert('لطفا کد رهگیری را وارد کنید');
-                return;
-            }
-
+            if(!id) { alert('لطفا کد رهگیری را وارد کنید'); return; }
             resultBox.style.display = 'block';
-            resultBox.innerHTML = `🔍 مرسوله با کد <b>${id}</b> در سیستم یافت نشد. دیتابیس سوپابیس شما فعال و متصل است و آماده دریافت اولین مرسوله‌ها می‌باشد.`;
+            resultBox.innerHTML = `🔍 مرسوله با کد <b>${id}</b> در سیستم یافت نشد. دیتابیس سوپابیس شما متصل و خالی است.`;
             resultBox.style.color = '#E5B83B';
         }
 
-        // ۳. ثبت مرسوله جدید
         function createNewDelivery() {
             const sender = document.getElementById('sender-name').value;
             const customer = document.getElementById('customer-name').value;
             const resultBox = document.getElementById('form-result');
-            
-            if(!sender || !customer) {
-                alert('لطفا نام فرستنده و گیرنده را وارد کنید');
-                return;
-            }
-
+            if(!sender || !customer) { alert('لطفا نام فرستنده و گیرنده را وارد کنید'); return; }
             resultBox.style.display = 'block';
-            resultBox.innerHTML = `✅ دیتابیس سوپابیس شما با موفقیت متصل است! اطلاعات فرستنده (<b>${sender}</b>) و گیرنده (<b>${customer}</b>) آماده ارسال ایمن به شبکه تحویل محلی است.`;
+            resultBox.innerHTML = `✅ دیتابیس سوپابیس متصل است! فرستنده: <b>${sender}</b> | گیرنده: <b>${customer}</b> آماده ارسال است.`;
             resultBox.style.color = '#2ecc71';
         }
 
-        // اجرای خودکار
-        checkConnection();
+        // اجرای خودکار هنگام لود
+        checkRealConnection();
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js').then(() => console.log('PWA Connected'));
