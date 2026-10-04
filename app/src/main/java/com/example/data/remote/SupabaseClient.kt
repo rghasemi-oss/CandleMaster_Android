@@ -7,8 +7,8 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 
 object SupabaseClient {
-    // Base URL format for Supabase: https://YOUR_PROJECT_REF.supabase.co/
-    private const val BASE_URL = "https://placeholder-project.supabase.co/"
+    // آدرس سرور رندر شما که با موفقیت دیپلویش کردیم و به سوپابیس متصل است
+    private const val BASE_URL = "https://onrender.com"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
