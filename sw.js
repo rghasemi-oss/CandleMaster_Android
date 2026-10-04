@@ -1,13 +1,29 @@
-const CACHE_NAME = 'ndn-pwa-v1';
+const CACHE_NAME = 'ndn-pwa-v2'; // ارتقای نسخه کش برای پاکسازی کش قبلی
 const ASSETS = [
   './',
   './index.html',
-  './manifest.json'
+  './app_manifest.json' // اصلاح نام مانیفست به نسخه جدید
 ];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS);
+    })
+  );
+});
+
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    })
   );
 });
 
