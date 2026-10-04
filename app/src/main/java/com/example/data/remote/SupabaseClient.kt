@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit
 
 object SupabaseClient {
     // آدرس سرور رندر شما که با موفقیت دیپلویش کردیم و به سوپابیس متصل است
-    private const val BASE_URL = "https://onrender.com"
+    private const val BASE_URL = "https://onrender.com/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
