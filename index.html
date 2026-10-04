@@ -20,6 +20,7 @@
             --error: #e74c3c;
             --admin-color: #9b59b6;
             --driver-color: #3498db;
+            --impersonate-bg: #7f8c8d;
         }
 
         body {
@@ -27,12 +28,18 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .main-wrapper {
+            max-width: 900px;
+            width: 100%;
+            padding: 20px;
             box-sizing: border-box;
         }
 
@@ -45,10 +52,10 @@
             box-shadow: 0 8px 24px rgba(0,0,0,0.4);
             border-top: 5px solid var(--accent);
             box-sizing: border-box;
+            margin: 100px auto 0 auto;
         }
 
         .dashboard-container {
-            max-width: 900px;
             width: 100%;
             background-color: var(--card-bg);
             padding: 25px;
@@ -58,13 +65,8 @@
             box-sizing: border-box;
         }
 
-        h2 {
-            color: var(--accent);
-            text-align: center;
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 22px;
-        }
+        h2, h3 { color: var(--accent); margin-top: 0; }
+        h2 { text-align: center; margin-bottom: 20px; font-size: 22px; }
 
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-size: 13px; color: var(--text-muted); }
@@ -91,7 +93,6 @@
             width: 100%;
             font-size: 15px;
             transition: background 0.2s;
-            margin-top: 10px;
         }
         .btn:hover { background-color: var(--accent-hover); }
 
@@ -111,8 +112,6 @@
             border-bottom: 1px solid var(--border);
             padding-bottom: 15px;
             margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 10px;
         }
 
         .role-badge {
@@ -122,42 +121,35 @@
             font-weight: bold;
         }
 
-        /* نوار سوئیچ پنل‌ها برای ادمین */
-        .panel-switcher {
-            background: #252525;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-            align-items: center;
-            gap: 10px;
-            border: 1px solid var(--border);
-        }
-
-        .switch-btn {
-            background: #333;
+        /* نوار بالای صفحه ویژه تست حالت Impersonation ادمین */
+        .impersonation-banner {
+            background-color: var(--error);
             color: white;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            display: none;
+            box-sizing: border-box;
+        }
+        .impersonation-banner button {
+            background: white;
+            color: var(--error);
             border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
+            padding: 3px 10px;
+            margin-right: 15px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 13px;
             font-weight: bold;
         }
-        .switch-btn.active {
-            background: var(--accent);
-            color: #121212;
-        }
-
-        .panel-view { display: none; }
-        .panel-view.active { display: block; }
 
         .grid {
             display: grid;
             grid-template-columns: 1fr;
             gap: 20px;
         }
-        @media(min-width: 700px) { .grid { grid-template-columns: 1.5fr 1fr; } }
+        @media(min-width: 700px) { .grid { grid-template-columns: 1.4fr 1fr; } }
 
         .sub-card {
             background: #252525;
@@ -167,6 +159,9 @@
             margin-bottom: 15px;
         }
 
+        .panel-view { display: none; }
+        .panel-view.active { display: block; }
+
         .logout-btn {
             background: transparent;
             border: 1px solid var(--error);
@@ -175,99 +170,89 @@
             border-radius: 6px;
             cursor: pointer;
         }
-        .info-tip {
-            font-size: 12px;
-            color: var(--text-muted);
-            background: rgba(229, 184, 59, 0.05);
-            padding: 10px;
-            border-radius: 6px;
-            border-left: 3px solid var(--accent);
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
 
-    <!-- فرم ورود -->
-    <div id="auth-section" class="auth-container">
-        <h2>ورود به سیستم توزیع NDN</h2>
-        <div id="auth-alert" class="alert"></div>
-        
-        <form onsubmit="handleAuth(event)">
-            <div class="form-group">
-                <label>آدرس ایمیل</label>
-                <input type="email" id="auth-email" required placeholder="ایمیل خود را وارد کنید">
-            </div>
-            <div class="form-group">
-                <label>کلمه عبور</label>
-                <input type="password" id="auth-password" required placeholder="******">
-            </div>
-            <button type="submit" class="btn">ورود به پنل کاربری</button>
-        </form>
-        
-        <div class="info-tip">
-            💡 <b>اطلاعات حساب ادمین برای تست:</b><br>
-            ایمیل: <code style="color:var(--accent)">admin@ndn.com</code><br>
-            رمز عبور: <code>123456</code> (دارای دسترسی سوئیچ پنل)
-        </div>
+    <!-- نوار هشدار ورود با هویت جعلی (Impersonation) -->
+    <div id="impersonate-banner" class="impersonation-banner">
+        ⚠️ شما در حال بررسی و تست عملکردی سیستم با هویت کاربر <span id="impersonated-user-name"></span> هستید.
+        <button onclick="exitImpersonation()">خروج از شبیه‌ساز و بازگشت به ادمین</button>
     </div>
 
-    <!-- داشبورد اصلی -->
-    <div id="dashboard-section" class="dashboard-container">
-        <div class="nav-bar">
-            <div>
-                <span style="font-weight: bold; font-size: 18px;">شبکه مدیریت توزیع NDN</span>
-                <span id="user-role-badge" class="role-badge" style="margin-right:10px;">کاربر</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <span id="user-display" style="font-size: 14px;"></span>
-                <button class="logout-btn" onclick="logout()">خروج</button>
-            </div>
-        </div>
-
-        <!-- نوار سوئیچ ادمین (فقط برای ادمین باز می‌شود) -->
-        <div id="admin-switcher" class="panel-switcher">
-            <span style="font-size:13px; color:var(--text-muted); font-weight:bold;">🛠️ مدیریت سطوح (ویژه ادمین):</span>
-            <button id="btn-admin-view" class="switch-btn active" onclick="changeView('admin')">پنل مدیریت کل</button>
-            <button id="btn-driver-view" class="switch-btn" onclick="changeView('driver')">نمای پیک / راننده</button>
-            <button id="btn-customer-view" class="switch-btn" onclick="changeView('customer')">نمای مشتری</button>
-        </div>
-
-        <!-- ۱. نمای پنل مدیریت (Admin View) -->
-        <div id="view-admin" class="panel-view active">
-            <div class="grid">
-                <div class="sub-card">
-                    <h3 style="color:var(--accent); margin-top:0;">ثبت و صدور مرسوله جدید</h3>
-                    <div class="form-group">
-                        <label>نام فرستنده</label>
-                        <input type="text" id="adm-sender" placeholder="نام فروشگاه یا فرستنده">
-                    </div>
-                    <div class="form-group">
-                        <label>نام مشتری (گیرنده)</label>
-                        <input type="text" id="adm-customer" placeholder="نام خریدار">
-                    </div>
-                    <div class="form-group">
-                        <label>تخصیص به هاب توزیع</label>
-                        <select id="adm-hub">
-                            <option value="hub-1">هاب مرکزی تهران</option>
-                            <option value="hub-2">هاب غرب - صادقیه</option>
-                            <option value="hub-3">هاب شرق - تهرانپارس</option>
-                        </select>
-                    </div>
-                    <button class="btn" onclick="adminSubmit()">صدور بارنامه و ثبت در سوپابیس</button>
+    <div class="main-wrapper">
+        <!-- فرم ورود -->
+        <div id="auth-section" class="auth-container">
+            <h2>ورود به سیستم توزیع NDN</h2>
+            <div id="auth-alert" class="alert"></div>
+            
+            <form onsubmit="handleAuth(event)">
+                <div class="form-group">
+                    <label>آدرس ایمیل</label>
+                    <input type="email" id="auth-email" required placeholder="admin@ndn.com">
                 </div>
-                <div class="sub-card">
-                    <h3 style="color:var(--accent); margin-top:0;">وضعیت کلی سیستم</h3>
-                    <p style="font-size:14px;">تعداد کل بارنامه‌ها: <b id="total-count" style="color:var(--accent)">0</b></p>
-                    <p style="font-size:14px;">پیک‌های فعال در خط: <b style="color:var(--driver-color)">۴ راننده</b></p>
-                    <p style="font-size:14px;">اتصال به دیتابیس: <b style="color:var(--success)">فعال ✅</b></p>
+                <div class="form-group">
+                    <label>کلمه عبور</label>
+                    <input type="password" id="auth-password" required placeholder="رمز عبور: 123456">
+                </div>
+                <button type="submit" class="btn">ورود به پنل کاربری</button>
+            </form>
+        </div>
+
+        <!-- داشبورد اصلی -->
+        <div id="dashboard-section" class="dashboard-container">
+            <div class="nav-bar">
+                <div>
+                    <span style="font-weight: bold; font-size: 18px;">شبکه مدیریت توزیع NDN</span>
+                    <span id="user-role-badge" class="role-badge" style="margin-right:10px;">کاربر</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span id="user-display" style="font-size: 14px;"></span>
+                    <button class="logout-btn" onclick="logout()">خروج از حساب</button>
                 </div>
             </div>
-        </div>
 
-        <!-- ۲. نمای پنل راننده (Driver View) -->
-        <div id="view-driver" class="panel-view">
-            <div class="sub-card" style="border-top: 3px solid var(--driver-color);">
-                <h3 style="color:var(--driver-color); margin-top:0;">لیست مأموریت‌های توزیع (مخصوص پیک)</h3>
-                <p style="text-align:right;">به عنوان راننده، شما می‌توانید وضعیت مرسولاتی که تحویلتان شده را تغییر دهید.</p>
-                <div style="background:#1a1a1a; padding:15px; border-radius:8px; border:1px solid #333;">
+            <!-- ۱. نمای پنل مدیریت (Admin View) -->
+            <div id="view-admin" class="panel-view">
+                <div class="grid">
+                    <div class="sub-card">
+                        <h3 style="margin-top:0;">ثبت و صدور بارنامه جدید</h3>
+                        <div class="form-group">
+                            <label>نام فرستنده</label>
+                            <input type="text" id="adm-sender" placeholder="نام فروشگاه">
+                        </div>
+                        <div class="form-group">
+                            <label>نام مشتری (گیرنده)</label>
+                            <input type="text" id="adm-customer" placeholder="نام خریدار">
+                        </div>
+                        <button class="btn" onclick="adminSubmit()">صدور بارنامه</button>
+                    </div>
+
+                    <!-- بخش ابزار ویژه ادمین برای ورود با هویت کاربران موجود جهت تست عملکرد -->
+                    <div class="sub-card" style="border-right: 4px solid var(--admin-color);">
+                        <h3 style="color:var(--admin-color); margin-top:0;">🛠️ شبیه‌ساز ورود با نقش کاربران</h3>
+                        <p style="font-size:12px; color:var(--text-muted);">یک کاربر موجود در سیستم را انتخاب یا بنویسید تا بدون داشتن رمز عبور، وارد پنل او شده و عملکرد و ویوهای او را برای تست عیب‌یابی بررسی کنید.</p>
+                        
+                        <div class="form-group">
+                            <label>انتخاب نقش یا ایمیل کاربر هدف برای تست</label>
+                            <select id="impersonate-target">
+                                <option value="driver@ndn.com|driver">راننده شماره ۱ (driver@ndn.com)</option>
+                                <option value="driver2@ndn.com|driver">راننده شماره ۲ (driver2@ndn.com)</option>
+                                <option value="reza_customer@gmail.com|customer">مشتری خریدار (reza_customer@gmail.com)</option>
+                            </select>
+                        </div>
+                        <button class="btn" style="background-color:var(--admin-color); color:white;" onclick="startImpersonation()">
+                            🚀 ورود به جای کاربر فوق و بررسی ویو
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ۲. نمای پنل راننده (Driver View) -->
+            <div id="view-driver" class="panel-view">
+                <div class="sub-card" style="border-top: 3px solid var(--driver-color);">
+                    <h3 style="color:var(--driver-color); margin-top:0;">📋 لیست توزیع و مأموریت‌های پیک</h3>
+                    <p style="font-size:13px;">تست دسترسی: شما به عنوان راننده مجاز به تغییر وضعیت توزیع مرسولات تخصیص یافته به خود هستید.</p>
+                    <div style="background:#1a1a1a; padding:15px; border-radius:8px; display:flex; justify-content:between; align-items:center; border:1px solid #333;">
+                        <div style="flex-grow:1;">
+                            <b>مرسوله: TRK-9950</b><br>
