@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سیستم یکپارچه توزیع NDN</title>
+    <link rel="icon" type="image/png" href="https://icons8.com">
     <style>
         :root {
             --bg-color: #121212;
@@ -49,7 +50,7 @@
         <button style="margin-right:15px; cursor:pointer; font-weight:bold; padding:4px 10px; border-radius:4px; border:none;" onclick="exitImp()">بازگشت به ادمین</button>
     </div>
 
-    <!-- داشبورد اصلی (مستقیم و بدون صفحه ورود لود می‌شود) -->
+    <!-- داشبورد اصلی -->
     <div id="dash-block" class="dashboard">
         <div class="nav-bar">
             <h3 style="margin:0;">پنل مدیریت شبکه توزیع NDN <span id="role-txt" style="font-size:12px; background:#9b59b6; padding:3px 8px; border-radius:4px; color:white;">ادمین سیستم</span></h3>
@@ -106,7 +107,7 @@
     <script>
         const BACKEND_URL = 'https://onrender.com';
 
-        // دریافت آمار زنده از دیتابیس در بدو ورود
+        // دریافت آمار زنده از دیتابیس
         async function getLiveCount() {
             try {
                 const response = await fetch(BACKEND_URL);
@@ -120,6 +121,7 @@
         }
         getLiveCount();
 
+        // ثبت واقعی سفارش در سوپابیس از طریق سرور رندر
         async function sendDataToSupabase() {
             var sender = document.getElementById('db-sender').value.trim();
             var customer = document.getElementById('db-customer').value.trim();
@@ -146,11 +148,10 @@
                 
                 if(result.success) {
                     alertBox.style.color = 'var(--success)';
-                    alertBox.innerHTML = `✅ بارنامه ثبت شد! کد رهگیری زنده: <b style="color:white">${result.trackingId}</b>`;
+                    alertBox.innerHTML = `✅ بارنامه ثبت شد! کد رهگیری: <b style="color:white">${result.trackingId}</b>`;
                     document.getElementById('db-sender').value = '';
                     document.getElementById('db-customer').value = '';
-                    // بروزرسانی آمار تعداد کل رکوردهای دیتابیس روی پنل
-                    getLiveCount();
+                    getLiveCount(); // بروزرسانی آمار زنده
                 } else {
                     alertBox.style.color = 'var(--error)';
                     alertBox.innerHTML = '❌ خطا: ' + result.message;
@@ -161,15 +162,6 @@
             } finally {
                 submitBtn.disabled = false;
             }
-        }
-
-            }
-
-            alertBox.style.color = 'var(--success)';
-            alertBox.innerHTML = '✅ داده بارنامه صادر شد! ارتباط سرور رندر و سوپابیس شما ۱۰۰٪ برقرار است.';
-            
-            let countEl = document.getElementById('live-count');
-            countEl.innerText = parseInt(countEl.innerText) + 1;
         }
 
         function goImp() {
