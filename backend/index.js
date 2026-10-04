@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
-const ws = require('ws'); // ماژول وب‌ساکت برای رفع ارور رندر
+const ws = require('ws'); 
 
 const app = express();
 app.use(cors());
@@ -16,56 +16,52 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.error("❌ Error: SUPABASE_URL and Supabase Key must be defined in environment variables!");
 }
 
-// ساخت کلاینت سوپابیس به همراه پیکربندی وب‌ساکت و غیرفعال‌سازی سشن سروری
 const supabase = createClient(SUPABASE_URL || '', SUPABASE_KEY || '', {
     auth: {
-        persistSession: false // بهینه‌سازی شده برای محیط‌های سروری مثل رندر
+        persistSession: false 
     },
     realtime: {
-        transport: ws // رفع خطای نبود نیتو وب‌ساکت در نود ۲۰
+        transport: ws 
     }
 });
 
-// Root endpoint
-app.get('/', (req, res) => {
-    res.json({ status: 'online', service: 'NDN Delivery Backend API', timestamp: new Date() });
-});
-
-// Test Supabase Database Connection Endpoint
-app.get('/api/test-db', async (req, res) => {
+// صفحه اصلی تغییر یافته برای تست همزمان سرور و دیتابیس
+app.get('/', async (req, res) => {
     try {
         if (!SUPABASE_URL || !SUPABASE_KEY) {
-            return res.status(500).json({
-                success: false,
-                message: 'Supabase environment variables are missing on the server.'
+            return res.json({
+                status: 'online',
+                service: 'NDN Delivery Backend API',
+                supabase_status: '❌ Error: Environment variables are missing on Render!'
             });
         }
 
-        // Query the deliveries table (or a lightweight test query)
-        const { data, error, count } = await supabase
+        // تست اتصال به تیبل دیتابیس
+        const { error, count } = await supabase
             .from('deliveries')
             .select('*', { count: 'exact', head: true });
 
         if (error) {
-            return res.status(500).json({
-                success: false,
-                message: 'Failed to connect to Supabase database',
-                error: error.message
+            return res.json({
+                status: 'online',
+                service: 'NDN Delivery Backend API',
+                supabase_status: '❌ Failed to connect to Supabase: ' + error.message
             });
         }
 
         res.json({
-            success: true,
-            message: 'Successfully connected to Supabase database!',
-            table: 'deliveries',
+            status: 'online',
+            service: 'NDN Delivery Backend API',
+            supabase_status: '✅ Successfully connected to Supabase database!',
             totalRecords: count || 0,
             timestamp: new Date()
         });
+
     } catch (err) {
-        res.status(500).json({
-            success: false,
-            message: 'Exception occurred while testing database connection',
-            error: err.message
+        res.json({
+            status: 'online',
+            service: 'NDN Delivery Backend API',
+            supabase_status: '❌ Exception: ' + err.message
         });
     }
 });
