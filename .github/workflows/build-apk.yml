@@ -22,24 +22,28 @@ jobs:
         java-version: '21'
         cache: 'gradle'
 
-    # نصب مستقیم و خودکار سیستم گرادل روی سرور گیت‌هاب (حل مشکل نبود فایل gradlew)
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
 
     - name: Build APK without Wrapper
       run: |
-        # پیدا کردن پوشه اصلی که کدهای اندروید در آن قرار دارد (جایی که فایل settings.gradle هست)
-        ANDROID_DIR=$(find . -name "settings.gradle*" -exec dirname {} \;)
+        # پیدا کردن دقیق پوشه اندروید بر اساس فایل تنظیمات کاتلین
+        ANDROID_DIR=$(find . -name "settings.gradle.kts" -exec dirname {} \; | head -n 1)
         
         if [ -z "$ANDROID_DIR" ]; then
-          echo "❌ Error: Could not find an Android project directory!"
+          # اگر کاتلین نبود، فایل معمولی را چک کند
+          ANDROID_DIR=$(find . -name "settings.gradle" -exec dirname {} \; | head -n 1)
+        fi
+        
+        if [ -z "$ANDROID_DIR" ]; then
+          echo "❌ Error: Could not find any Android project directory!"
           exit 1
         fi
         
-        echo "✅ Found Android project in: $ANDROID_DIR"
+        echo "✅ Selected Android project directory: $ANDROID_DIR"
         cd "$ANDROID_DIR"
         
-        # اجرای اسکریپت جابه‌جایی دارایی‌ها در صورت وجود
+        # اجرای اسکریپت دارایی‌ها در صورت وجود
         if [ -f "./scripts/sync_assets.sh" ]; then
           chmod +x ./scripts/sync_assets.sh
           ./scripts/sync_assets.sh || true
@@ -48,14 +52,13 @@ jobs:
           ../scripts/sync_assets.sh || true
         fi
         
-        # ساخت پوشه‌های ضروری جهت اطمینان
         mkdir -p app/src/main/assets
         mkdir -p app/src/main/res/raw
         
-        # ساخت فایل نصب با استفاده از گرادل نصب شده روی سیستم گیت‌هاب
+        # ساخت فایل نصب
         gradle assembleDebug --no-daemon
 
-        # جمع‌آوری و جابه‌جایی فایل خروجی برای آپلود
+        # انتقال فایل خروجی به پوشه اصلی جهت آپلود
         mkdir -p $GITHUB_WORKSPACE/output_apk
         cp app/build/outputs/apk/debug/app-debug.apk $GITHUB_WORKSPACE/output_apk/CandleMaster.apk
 
