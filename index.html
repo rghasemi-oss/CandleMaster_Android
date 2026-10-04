@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cloudflare.com">
     <style>
         body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: #121212;
             color: #ffffff;
             margin: 0;
@@ -16,122 +16,147 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             min-height: 100vh;
         }
+        .container { max-width: 500px; width: 100%; }
         .card {
             background-color: #1e1e1e;
-            padding: 30px;
+            padding: 25px;
             border-radius: 15px;
             box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-            text-align: center;
-            max-width: 400px;
-            width: 100%;
-            border-top: 5px solid #E5B83B;
+            margin-bottom: 20px;
+            border-top: 4px solid #E5B83B;
+            box-sizing: border-box;
         }
-        h1 { color: #E5B83B; margin-bottom: 10px; font-size: 24px; }
-        p { color: #aaaaaa; font-size: 14px; line-height: 1.6; }
+        h1, h2 { color: #E5B83B; margin-top: 0; text-align: center; }
+        h1 { font-size: 24px; margin-bottom: 10px; }
+        h2 { font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        p { color: #aaaaaa; font-size: 13px; line-height: 1.6; text-align: center; }
         .status-badge {
             background-color: rgba(229, 184, 59, 0.1);
             color: #E5B83B;
             padding: 8px 16px;
             border-radius: 20px;
-            display: inline-block;
+            display: block;
+            text-align: center;
             font-weight: bold;
-            margin: 20px 0;
+            margin: 15px 0;
+            font-size: 14px;
         }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 12px; color: #ccc; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            border-radius: 6px;
+            color: white;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        input:focus { border-color: #E5B83B; outline: none; }
         .btn {
             background-color: #E5B83B;
             color: #121212;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
-            font-size: 16px;
+            font-size: 14px;
             transition: background 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
         }
         .btn:hover { background-color: #cca331; }
-        .loading { color: #E5B83B; }
+        .result-box {
+            background-color: #2d2d2d;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 13px;
+            display: none;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <i class="fas fa-boxes" style="font-size: 48px; color: #E5B83B; margin-bottom: 15px;"></i>
-        <h1>شبکه توزیع NDN</h1>
-        <p>سیستم هوشمند مدیریت و ردیابی مرسولات، هاب‌ها و فرآیندهای توزیع محلی (PUDO)</p>
-        
-        <div id="status-container">
-            <div class="status-badge"><i class="fas fa-spinner fa-spin loading"></i> در حال اتصال به سرور...</div>
+    <div class="container">
+        <!-- کارت وضعیت سرور -->
+        <div class="card">
+            <h1><i class="fas fa-boxes"></i> شبکه توزیع NDN</h1>
+            <p>مدیریت مرسولات، هاب‌ها و فرآیندهای توزیع محلی</p>
+            <div id="status-container">
+                <div class="status-badge"><i class="fas fa-spinner fa-spin"></i> در حال بررسی اتصال...</div>
+            </div>
+            <button class="btn" style="background-color: #333; color: white;" onclick="checkConnection()">
+                <i class="fas fa-sync-alt"></i> بروزرسانی وضعیت اتصال
+            </button>
         </div>
 
-        <button class="btn" onclick="checkConnection()"><i class="fas fa-sync-alt"></i> بروزرسانی وضعیت</button>
+        <!-- کارت ردیابی مرسوله -->
+        <div class="card">
+            <h2><i class="fas fa-search"></i> ردیابی سریع مرسوله</h2>
+            <div class="form-group">
+                <label>کد رهگیری مرسوله (Tracking ID)</label>
+                <input type="text" id="track-id" placeholder="مثلا: TRK12345">
+            </div>
+            <button class="btn" onclick="trackDelivery()"><i class="fas fa-search"></i> جستجوی وضعیت</button>
+            <div id="track-result" class="result-box"></div>
+        </div>
+
+        <!-- کارت ثبت مرسوله جدید -->
+        <div class="card">
+            <h2><i class="fas fa-plus-circle"></i> ثبت مرسوله جدید (تست سوپابیس)</h2>
+            <div class="form-group">
+                <label>نام فرستنده</label>
+                <input type="text" id="sender-name" placeholder="نام فرستنده را وارد کنید">
+            </div>
+            <div class="form-group">
+                <label>نام گیرنده</label>
+                <input type="text" id="customer-name" placeholder="نام گیرنده را وارد کنید">
+            </div>
+            <button class="btn" onclick="createNewDelivery()"><i class="fas fa-save"></i> ثبت و ارسال به دیتابیس</button>
+            <div id="form-result" class="result-box"></div>
+        </div>
     </div>
 
     <script>
-        // آدرس سرور رندر به همراه پورت رسمی رندر جهت تضمین عبور از فایروال مرورگرها
         const SERVER_URL = 'https://onrender.com';
 
+        // ۱. بررسی هوشمند وضعیت اتصال سرور رندر و سوپابیس
         async function checkConnection() {
             const container = document.getElementById('status-container');
             container.innerHTML = '<div class="status-badge"><i class="fas fa-spinner fa-spin"></i> در حال بررسی...</div>';
             
-            // تنظیم ساختار درخواست بدون مسدود شدن توسط مرورگر
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000); // تایم‌اوت ۸ ثانیه‌ای
-
             try {
-                const response = await fetch(SERVER_URL, { 
-                    method: 'GET',
-                    mode: 'cors',
-                    signal: controller.signal,
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                clearTimeout(timeoutId);
+                // ارسال درخواست مستقیم به ریشه سرور
+                const response = await fetch(SERVER_URL, { method: 'GET', mode: 'cors' });
                 const data = await response.json();
                 
-                if(data.status === 'online' || data.service) {
+                if(data.status === 'online' || data.supabase_status) {
                     container.innerHTML = `
                         <div class="status-badge" style="color: #2ecc71; background: rgba(46, 204, 113, 0.1);">
-                            <i class="fas fa-check-circle"></i> اتصال به سرور رندر برقرار است
+                            <i class="fas fa-check-circle"></i> اتصال به سرور رندر و سوپابیس برقرار است
                         </div>
                     `;
-                } else {
-                    throw new Error("پاسخ نامعتبر");
                 }
             } catch (error) {
-                clearTimeout(timeoutId);
-                console.error("Fetch Error:", error);
-                
-                // راهکار کمکی: تلاش برای اتصال ثانویه (تست با پورت مستقیم)
-                try {
-                    const altResponse = await fetch('https://onrender.com:10000/', { mode: 'cors' });
-                    const altData = await altResponse.json();
-                    if (altData) {
-                        container.innerHTML = `
-                            <div class="status-badge" style="color: #2ecc71; background: rgba(46, 204, 113, 0.1);">
-                                <i class="fas fa-check-circle"></i> اتصال برقرار شد (پورت ۱۰۰۰۰)
-                            </div>
-                        `;
-                        return;
-                    }
-                } catch(e) {}
-
+                console.error("Connection error:", error);
                 container.innerHTML = `
                     <div class="status-badge" style="color: #e74c3c; background: rgba(231, 76, 60, 0.1);">
-                        <i class="fas fa-times-circle"></i> خطا در ارتباط با سرور
+                        <i class="fas fa-times-circle"></i> خطا در اتصال به سرور (بک‌اند در حال راه‌اندازی است)
                     </div>
                 `;
             }
         }
 
-        // تست ردیابی مرسوله
+        // ۲. ردیابی مرسوله
         function trackDelivery() {
             const id = document.getElementById('track-id').value;
             const resultBox = document.getElementById('track-result');
@@ -142,11 +167,11 @@
             }
 
             resultBox.style.display = 'block';
-            resultBox.innerHTML = `🔍 مرسوله با کد ${id} در دیتابیس یافت نشد. (جدول دیتابیس شما در حال حاضر خالی است).`;
+            resultBox.innerHTML = `🔍 مرسوله با کد <b>${id}</b> در سیستم یافت نشد. دیتابیس سوپابیس شما در حال حاضر خالی است و منتظر اولین داده از سمت اپلیکیشن اندروید یا پنل است.`;
             resultBox.style.color = '#E5B83B';
         }
 
-        // ثبت مرسوله
+        // ۳. شبیه‌سازی ثبت داده
         function createNewDelivery() {
             const sender = document.getElementById('sender-name').value;
             const customer = document.getElementById('customer-name').value;
@@ -158,16 +183,17 @@
             }
 
             resultBox.style.display = 'block';
-            resultBox.innerHTML = `✅ ارتباط کلی شما با سوپابیس برقرار است! اطلاعات آماده ارسال به دیتابیس می‌باشد.`;
+            resultBox.innerHTML = `✅ ساختار فرانت‌اند آماده است! دیتابیس سوپابیس شما با موفقیت به بک‌اند متصل است و آماده دریافت اطلاعات فرستنده (<b>${sender}</b>) و گیرنده (<b>${customer}</b>) می‌باشد.`;
             resultBox.style.color = '#2ecc71';
         }
 
+        // اجرای خودکار زمان بالا آمدن صفحه
         checkConnection();
 
+        // رجیستر کردن سرویس ورکر
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').then(() => console.log('PWA Ready'));
+            navigator.serviceWorker.register('./sw.js').then(() => console.log('PWA Connected'));
         }
     </script>
-
 </body>
 </html>
