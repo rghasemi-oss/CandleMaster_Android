@@ -1,4 +1,4 @@
-﻿const supabase = require('../supabase');
+﻿const { getSupabase } = require('../supabase');
 
 async function requireAuth(req, res, next) {
     const authorization = req.headers.authorization || '';
@@ -20,6 +20,7 @@ async function requireAuth(req, res, next) {
     }
 
     try {
+        const supabase = getSupabase();
         const { data, error } = await supabase.auth.getUser(token);
 
         if (error || !data || !data.user) {
@@ -32,6 +33,8 @@ async function requireAuth(req, res, next) {
         req.user = data.user;
         next();
     } catch (error) {
+        console.error('Authentication error:', error);
+
         return res.status(401).json({
             success: false,
             error: 'Authentication failed'

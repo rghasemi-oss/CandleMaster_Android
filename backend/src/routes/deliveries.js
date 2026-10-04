@@ -1,5 +1,5 @@
 ﻿const express = require('express');
-const supabase = require('../supabase');
+const { getSupabase } = require('../supabase');
 const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
@@ -8,6 +8,8 @@ router.use(requireAuth);
 
 router.get('/', async (req, res) => {
     try {
+        const supabase = getSupabase();
+
         const { data, error } = await supabase
             .from('deliveries')
             .select('*')
@@ -34,6 +36,8 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
+        const supabase = getSupabase();
+
         const {
             trackingId,
             sender,
@@ -91,6 +95,7 @@ router.post('/', async (req, res) => {
 
 router.delete('/:trackingId', async (req, res) => {
     try {
+        const supabase = getSupabase();
         const { trackingId } = req.params;
 
         const { error } = await supabase
