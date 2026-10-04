@@ -191,22 +191,20 @@
     </div>
 
     <div class="main-wrapper">
-        <!-- فرم ورود -->
+        <!-- فرم ورود (تگ form برداشته شد تا از رفرش خودکار جلوگیری شود) -->
         <div id="auth-section" class="auth-container">
             <h2>ورود به سیستم توزیع NDN</h2>
             <div id="auth-alert" class="alert"></div>
             
-            <form onsubmit="handleAuth(event)">
-                <div class="form-group">
-                    <label>آدرس ایمیل ادمین</label>
-                    <input type="email" id="auth-email" required placeholder="admin@ndn.com" value="admin@ndn.com">
-                </div>
-                <div class="form-group">
-                    <label>کلمه عبور</label>
-                    <input type="password" id="auth-password" required placeholder="رمز عبور">
-                </div>
-                <button type="submit" class="btn">ورود به پنل کاربری</button>
-            </form>
+            <div class="form-group">
+                <label>آدرس ایمیل ادمین</label>
+                <input type="email" id="auth-email" placeholder="admin@ndn.com" value="admin@ndn.com">
+            </div>
+            <div class="form-group">
+                <label>کلمه عبور</label>
+                <input type="password" id="auth-password" placeholder="رمز عبور">
+            </div>
+            <button type="button" class="btn" onclick="directLogin()">ورود به پنل کاربری</button>
 
             <div class="info-tip">
                 💡 <b>مشخصات ورود ادمین برای تست:</b><br>
