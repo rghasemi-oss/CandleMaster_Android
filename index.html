@@ -26,9 +26,9 @@
         }
         .dashboard {
             width: 100%; max-width: 800px; background-color: var(--card-bg); padding: 25px;
-            border-radius: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: block;
+            border-radius: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); border-top: 5px solid var(--accent);
         }
-        h2, h3 { color: var(--accent); text-align: center; margin-top: 0; }
+        h3 { color: var(--accent); text-align: center; margin-top: 0; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; font-size: 13px; color: var(--text-muted); }
         input, select { width: 100%; padding: 12px; background-color: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; color: white; box-sizing: border-box; }
@@ -43,16 +43,17 @@
 </head>
 <body>
 
+    <!-- نوار شبیه‌ساز نقش‌ها -->
     <div id="imp-banner" class="impersonation-banner">
         ⚠️ نمای شبیه‌سازی شده کاربر: <span id="imp-user"></span>
-        <button style="margin-right:15px; cursor:pointer; font-weight:bold;" onclick="exitImp()">بازگشت به ادمین</button>
+        <button style="margin-right:15px; cursor:pointer; font-weight:bold; padding:4px 10px; border-radius:4px; border:none;" onclick="exitImp()">بازگشت به ادمین</button>
     </div>
 
     <!-- داشبورد اصلی (مستقیم و بدون صفحه ورود لود می‌شود) -->
     <div id="dash-block" class="dashboard">
         <div class="nav-bar">
-            <h3>پنل مدیریت شبکه توزیع NDN <span id="role-txt" style="font-size:12px; background:#9b59b6; padding:3px 8px; border-radius:4px;">ادمین سیستم</span></h3>
-            <span style="font-size:13px; color:var(--accent);">خوش آمدید: ادمین کل</span>
+            <h3 style="margin:0;">پنل مدیریت شبکه توزیع NDN <span id="role-txt" style="font-size:12px; background:#9b59b6; padding:3px 8px; border-radius:4px; color:white;">ادمین سیستم</span></h3>
+            <span style="font-size:13px; color:var(--accent); font-weight:bold;">وضعیت: ادمین کل</span>
         </div>
         
         <div id="admin-tools" class="grid">
@@ -87,7 +88,8 @@
         <!-- ویو پیک -->
         <div id="driver-view" style="display:none;" class="sub-card">
             <h4 style="color:#3498db; margin:0 0 15px 0;">لیست ماموریت‌های پیک خط</h4>
-            <p>وضعیت بسته فرضی: TRK-10023 ➡️ <button class="btn" style="width:auto; padding:5px 10px; background:#3498db; color:white;" onclick="alert('وضعیت به تحویل شده تغییر یافت.')">تایید تحویل مرسوله</button></p>
+            <p style="font-size:14px; margin-bottom:15px;">وضعیت بسته فرضی: TRK-10023</p>
+            <button class="btn" style="width:auto; padding:8px 15px; background:#3498db; color:white;" onclick="alert('وضعیت به تحویل شده تغییر یافت.')">تایید تحویل مرسوله به مشتری</button>
         </div>
 
         <!-- ویو مشتری -->
@@ -104,7 +106,7 @@
     <script>
         const BACKEND_URL = 'https://onrender.com';
 
-        // اجرای مستقیم آمار زنده در بدو ورود بدون نیاز به زدن دکمه
+        // دریافت آمار زنده از دیتابیس در بدو ورود
         async function getLiveCount() {
             try {
                 const response = await fetch(BACKEND_URL);
@@ -129,7 +131,7 @@
             }
 
             alertBox.style.color = 'var(--success)';
-            alertBox.innerHTML = '⏳ داده بارنامه صادر شد! ارتباط سرور رندر و سوپابیس شما ۱۰۰٪ برقرار است.';
+            alertBox.innerHTML = '✅ داده بارنامه صادر شد! ارتباط سرور رندر و سوپابیس شما ۱۰۰٪ برقرار است.';
             
             let countEl = document.getElementById('live-count');
             countEl.innerText = parseInt(countEl.innerText) + 1;
