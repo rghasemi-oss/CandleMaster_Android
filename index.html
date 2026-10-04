@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سیستم یکپارچه توزیع NDN</title>
-    <!-- تغییر آدرس برای شکستن کش ابری سرورهای گیت هاب -->
-    <link rel="manifest" href="./app_manifest.json?v=20">
+    <link rel="manifest" href="./app_manifest.json?v=30">
     <link rel="icon" type="image/png" href="https://icons8.com">
     <style>
         :root {
@@ -66,25 +65,24 @@
 
     <div id="impersonate-banner" class="impersonation-banner">
         ⚠️ شما در حال بررسی و تست عملکردی سیستم با هویت کاربر <span id="impersonated-user-name"></span> هستید.
-        <button id="btn-exit-impersonation">خروج از شبیه‌ساز و بازگشت به ادمین</button>
+        <button id="btn-exit-impersonation" onclick="exitImpersonation()">خروج از شبیه‌ساز و بازگشت به ادمین</button>
     </div>
 
     <div class="main-wrapper">
-        <!-- فرم ورود (تمامی شناسه ها و توابع onclick به کلی حذف شدند تا جلوی باگ های کش گیت هاب گرفته شود) -->
         <div id="auth-section" class="auth-container">
             <h2>ورود به سیستم توزیع NDN</h2>
             <div id="auth-alert" class="alert"></div>
             
             <div class="form-group">
-                <label>آدرس ایمیل ادمین</label>
-                <input type="email" id="auth-email" placeholder="admin@ndn.com" value="admin@ndn.com">
+                <label for="auth-email">آدرس ایمیل ادمین</label>
+                <input type="email" id="auth-email" name="email" placeholder="admin@ndn.com" value="admin@ndn.com">
             </div>
             <div class="form-group">
-                <label>کلمه عبور</label>
-                <input type="password" id="auth-password" placeholder="رمز عبور">
+                <label for="auth-password">کلمه عبور</label>
+                <input type="password" id="auth-password" name="password" placeholder="رمز عبور">
             </div>
-            <!-- دکمه ورود کاملاً کلاسیک و بدون ویژگی اینلاین -->
-            <button type="button" id="btn-submit-login" class="btn">ورود به پنل کاربری</button>
+            <!-- Exposing a global, non-blocked inline onclick trigger -->
+            <button type="button" id="btn-submit-login" class="btn" onclick="executeDirectLogin()">ورود به پنل کاربری</button>
 
             <div class="info-tip">
                 💡 <b>مشخصات ورود ادمین برای تست:</b><br>
@@ -101,7 +99,7 @@
                 </div>
                 <div style="display: flex; align-items: center; gap: 15px;">
                     <span id="user-display" style="font-size: 14px;"></span>
-                    <button id="btn-master-logout" class="logout-btn">خروج از حساب</button>
+                    <button id="btn-master-logout" class="logout-btn" onclick="logout()">خروج از حساب</button>
                 </div>
             </div>
 
@@ -110,28 +108,28 @@
                     <div class="sub-card">
                         <h3 style="margin-top:0;"><i class="fas fa-file-invoice"></i> ثبت و صدور بارنامه جدید</h3>
                         <div class="form-group">
-                            <label>نام فرستنده</label>
-                            <input type="text" id="adm-sender" placeholder="نام فروشگاه">
+                            <label for="adm-sender">نام فرستنده</label>
+                            <input type="text" id="adm-sender" name="sender" placeholder="نام فروشگاه">
                         </div>
                         <div class="form-group">
-                            <label>نام مشتری (گیرنده)</label>
-                            <input type="text" id="adm-customer" placeholder="نام خریدار">
+                            <label for="adm-customer">نام مشتری (گیرنده)</label>
+                            <input type="text" id="adm-customer" name="customer" placeholder="نام خریدار">
                         </div>
-                        <button id="btn-admin-submit" class="btn">صدور بارنامه و ذخیره</button>
+                        <button id="btn-admin-submit" class="btn" onclick="adminSubmit()">صدور بارنامه و ذخیره</button>
                     </div>
 
                     <div class="sub-card" style="border-right: 4px solid var(--admin-color);">
                         <h3 style="color:var(--admin-color); margin-top:0;">🛠️ شبیه‌ساز ورود با نقش کاربران</h3>
                         <p style="font-size:12px; color:var(--text-muted);">یک کاربر هدف را انتخاب کنید تا دسترسی‌های وی را تست کنید.</p>
                         <div class="form-group">
-                            <label>انتخاب حساب کاربر فرضی برای بررسی عملکرد</label>
-                            <select id="impersonate-target">
+                            <label for="impersonate-target">انتخاب حساب کاربر فرضی برای بررسی عملکرد</label>
+                            <select id="impersonate-target" name="target">
                                 <option value="driver1@ndn.com">پیک موتوری هاب شماره ۱ (driver1@ndn.com)</option>
                                 <option value="driver2@ndn.com">راننده توزیع سنگین (driver2@ndn.com)</option>
                                 <option value="customer_test@gmail.com">خریدار نهایی مرسوله (customer_test@gmail.com)</option>
                             </select>
                         </div>
-                        <button id="btn-start-impersonation" class="btn" style="background-color:var(--admin-color); color:white;">
+                        <button id="btn-start-impersonation" class="btn" style="background-color:var(--admin-color); color:white;" onclick="startImpersonation()">
                             🚀 ورود به جای کاربر و بررسی دسترسی‌ها
                         </button>
                     </div>
@@ -155,7 +153,5 @@
                 <div class="sub-card" style="border-top: 3px solid var(--success);">
                     <h3 style="color:var(--success); margin-top:0;">📦 پنل پیگیری مرسولات خریدار</h3>
                     <div class="form-group">
-                        <label>کد رهگیری مرسوله‌تان را وارد کنید</label>
-                        <input type="text" placeholder="مثال: TRK-10023">
-                    </div>
-                    <button type="button" class="btn" style="background:var(--success); color:#121212" onclick="alert('سیستم ردیابی مشتری فعال است')">جستجوی زنده بارنامه</button>
+                        <label for="cust-track">کد رهگیری مرسوله‌تان را وارد کنید</label>
+                        <input type="text" id="cust-track" name="cust-track" placeholder="مثال: TRK-10023">
