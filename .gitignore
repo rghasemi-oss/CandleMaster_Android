@@ -16,3 +16,10 @@
 local.properties
 .env
 debug.keystore
+
+# Node backend
+backend/node_modules/
+
+# Local development backups
+.phase1-backups/
+.pwa-backup/
