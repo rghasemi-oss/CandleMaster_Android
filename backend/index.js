@@ -5,7 +5,14 @@ require('dotenv').config();
 const ws = require('ws'); 
 
 const app = express();
-app.use(cors());
+
+// اصلاح بخش CORS برای باز کردن دسترسی همزمان اندروید و وب‌سایت PWA شما
+app.use(cors({
+    origin: '*', // اجازه دسترسی به تمامی دامنه‌ها از جمله گیت‌هاب پیجز
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
@@ -25,7 +32,7 @@ const supabase = createClient(SUPABASE_URL || '', SUPABASE_KEY || '', {
     }
 });
 
-// صفحه اصلی تغییر یافته برای تست همزمان سرور و دیتابیس
+// صفحه اصلی برای تست همزمان سرور و دیتابیس
 app.get('/', async (req, res) => {
     try {
         if (!SUPABASE_URL || !SUPABASE_KEY) {
@@ -36,7 +43,6 @@ app.get('/', async (req, res) => {
             });
         }
 
-        // تست اتصال به تیبل دیتابیس
         const { error, count } = await supabase
             .from('deliveries')
             .select('*', { count: 'exact', head: true });
