@@ -120,14 +120,49 @@
         }
         getLiveCount();
 
-        function sendDataToSupabase() {
+        async function sendDataToSupabase() {
             var sender = document.getElementById('db-sender').value.trim();
             var customer = document.getElementById('db-customer').value.trim();
             var alertBox = document.getElementById('db-alert');
+            var submitBtn = document.getElementById('submit-btn');
 
             if(!sender || !customer) {
                 alert('لطفا مشخصات فرستنده و گیرنده را پر کنید.');
                 return;
+            }
+
+            submitBtn.disabled = true;
+            alertBox.style.color = '#E5B83B';
+            alertBox.innerHTML = '⏳ در حال ثبت بارنامه در دیتابیس سوپابیس...';
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/deliveries`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sender: sender, customer: customer, status: 'PENDING' })
+                });
+                
+                const result = await response.json();
+                
+                if(result.success) {
+                    alertBox.style.color = 'var(--success)';
+                    alertBox.innerHTML = `✅ بارنامه ثبت شد! کد رهگیری زنده: <b style="color:white">${result.trackingId}</b>`;
+                    document.getElementById('db-sender').value = '';
+                    document.getElementById('db-customer').value = '';
+                    // بروزرسانی آمار تعداد کل رکوردهای دیتابیس روی پنل
+                    getLiveCount();
+                } else {
+                    alertBox.style.color = 'var(--error)';
+                    alertBox.innerHTML = '❌ خطا: ' + result.message;
+                }
+            } catch (err) {
+                alertBox.style.color = 'var(--error)';
+                alertBox.innerHTML = '❌ خطا در ارتباط با شبکه توزیع.';
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
             }
 
             alertBox.style.color = 'var(--success)';
