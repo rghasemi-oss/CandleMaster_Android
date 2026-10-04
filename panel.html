@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سیستم یکپارچه توزیع NDN</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent: #E5B83B;
+            --accent-hover: #cca331;
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
+            --input-bg: #2d2d2d;
+            --border: #444;
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --admin-color: #9b59b6;
+            --driver-color: #3498db;
+        }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+        .container { max-width: 500px; width: 100%; }
+        .card {
+            background-color: var(--card-bg); padding: 30px; border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4); border-top: 5px solid var(--accent); margin-top: 50px;
+        }
+        .dashboard {
+            width: 100%; max-width: 800px; background-color: var(--card-bg); padding: 25px;
+            border-radius: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none;
+        }
+        h2, h3 { color: var(--accent); text-align: center; margin-top: 0; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 13px; color: var(--text-muted); }
+        input, select { width: 100%; padding: 12px; background-color: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; color: white; box-sizing: border-box; }
+        .btn { background-color: var(--accent); color: #121212; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px; }
+        .btn:hover { background-color: var(--accent-hover); }
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; }
+        .impersonation-banner { background-color: var(--error); color: white; width: 100%; padding: 12px; text-align: center; font-weight: bold; display: none; position: fixed; top: 0; left: 0; }
+        .sub-card { background: #252525; padding: 20px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 15px; }
+        .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media(min-width: 600px) { .grid { grid-template-columns: 1.2fr 1fr; } }
+    </style>
+</head>
+<body>
+
+    <div id="imp-banner" class="impersonation-banner">
+        ⚠️ نمای شبیه‌سازی شده کاربر: <span id="imp-user"></span>
+        <button style="margin-right:15px; cursor:pointer;" onclick="exitImp()">بازگشت به ادمین</button>
+    </div>
+
+    <!-- فرم ورود -->
+    <div id="login-block" class="container">
+        <div class="card">
+            <h2>ورود به سیستم توزیع NDN</h2>
+            <div class="form-group">
+                <label>ایمیل ادمین</label>
+                <input type="email" id="email" value="admin@ndn.com">
+            </div>
+            <div class="form-group">
+                <label>کلمه عبور</label>
+                <input type="password" id="pass" placeholder="123456">
+            </div>
+            <button type="button" class="btn" onclick="checkLogin()">ورود به پنل</button>
+        </div>
+    </div>
+
+    <!-- داشبورد اصلی -->
+    <div id="dash-block" class="dashboard">
+        <div class="nav-bar">
+            <h3>پنل مدیریت شبکه توزیع NDN <span id="role-txt" style="font-size:12px; background:#9b59b6; padding:3px 8px; border-radius:4px;">ادمین</span></h3>
+            <button class="btn" style="width:auto; padding:5px 15px; background:#e74c3c; color:white;" onclick="location.reload()">خروج</button>
+        </div>
+        
+        <div id="admin-tools" class="grid">
+            <div class="sub-card">
+                <h4 style="color:var(--accent); margin:0 0 15px 0;">ثبت بارنامه جدید</h4>
+                <div class="form-group">
+                    <label>نام فرستنده</label>
+                    <input type="text" placeholder="فروشگاه مبدا">
+                </div>
+                <div class="form-group">
+                    <label>نام گیرنده</label>
+                    <input type="text" placeholder="خریدار مقصد">
+                </div>
+                <button class="btn" onclick="alert('بارنامه صادر شد')">صدور بارنامه</button>
+            </div>
+
+            <div class="sub-card" style="border-right:4px solid #9b59b6;">
+                <h4 style="color:#9b59b6; margin:0 0 15px 0;">🛠️ ورود با نقش سایر کاربران (تست)</h4>
+                <div class="form-group">
+                    <label>انتخاب حساب کاربری هدف</label>
+                    <select id="imp-select">
+                        <option value="driver">راننده توزیع (driver1@ndn.com)</option>
+                        <option value="customer">مشتری نهایی (customer@gmail.com)</option>
+                    </select>
+                </div>
+                <button class="btn" style="background:#9b59b6; color:white;" onclick="goImp()">بررسی ویو کاربر</button>
+            </div>
+        </div>
+
+        <!-- ویو پیک -->
+        <div id="driver-view" style="display:none;" class="sub-card">
+            <h4 style="color:#3498db; margin:0 0 15px 0;">لیست ماموریت‌های پیک</h4>
+            <p>وضعیت بسته: TRK-10023 ➡️ <button onclick="alert('وضعیت تغییر کرد')">تایید تحویل مرسوله</button></p>
+        </div>
+
+        <!-- ویو مشتری -->
+        <div id="customer-view" style="display:none;" class="sub-card">
+            <h4 style="color:#2ecc71; margin:0 0 15px 0;">پیگیری بسته خریدار</h4>
+            <input type="text" placeholder="کد رهگیری">
+            <button class="btn" style="background:#2ecc71; color:black; margin-top:10px;">جستجو</button>
+        </div>
+    </div>
+
+    <script>
+        function checkLogin() {
+            var e = document.getElementById('email').value.trim();
+            var p = document.getElementById('pass').value.trim();
+            if(e === 'admin@ndn.com' && p === '123456') {
+                document.getElementById('login-block').style.display = 'none';
+                document.getElementById('dash-block').style.display = 'block';
+            } else {
+                alert('رمز اشتباه است');
+            }
+        }
+
+        function goImp() {
+            var role = document.getElementById('imp-select').value;
+            document.getElementById('imp-banner').style.display = 'block';
+            document.getElementById('imp-user').innerText = role === 'driver' ? 'راننده' : 'مشتری';
+            
+            document.getElementById('admin-tools').style.display = 'none';
+            document.getElementById('driver-view').style.display = role === 'driver' ? 'block' : 'none';
+            document.getElementById('customer-view').style.display = role === 'customer' ? 'block' : 'none';
+        }
+
+        function exitImp() {
+            document.getElementById('imp-banner').style.display = 'none';
+            document.getElementById('admin-tools').style.display = 'grid';
+            document.getElementById('driver-view').style.display = 'none';
+            document.getElementById('customer-view').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
