@@ -22,18 +22,22 @@ jobs:
         java-version: '21'
         cache: 'gradle'
 
-    - name: Find Gradle Directory and Build APK
+    # نصب مستقیم و خودکار سیستم گرادل روی سرور گیت‌هاب (حل مشکل نبود فایل gradlew)
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+
+    - name: Build APK without Wrapper
       run: |
-        # پیدا کردن پوشه‌ای که فایل gradlew در آن قرار دارد
-        GRADLE_DIR=$(find . -name "gradlew" -exec dirname {} \;)
+        # پیدا کردن پوشه اصلی که کدهای اندروید در آن قرار دارد (جایی که فایل settings.gradle هست)
+        ANDROID_DIR=$(find . -name "settings.gradle*" -exec dirname {} \;)
         
-        if [ -z "$GRADLE_DIR" ]; then
-          echo "❌ Error: Could not find gradlew anywhere in the repository!"
+        if [ -z "$ANDROID_DIR" ]; then
+          echo "❌ Error: Could not find an Android project directory!"
           exit 1
         fi
         
-        echo "✅ Found Gradle project in: $GRADLE_DIR"
-        cd "$GRADLE_DIR"
+        echo "✅ Found Android project in: $ANDROID_DIR"
+        cd "$ANDROID_DIR"
         
         # اجرای اسکریپت جابه‌جایی دارایی‌ها در صورت وجود
         if [ -f "./scripts/sync_assets.sh" ]; then
@@ -48,11 +52,10 @@ jobs:
         mkdir -p app/src/main/assets
         mkdir -p app/src/main/res/raw
         
-        # مجوز دادن به گرادل و ساخت فایل نصب
-        chmod +x gradlew
-        ./gradlew assembleDebug --no-daemon
-        
-        # انتقال فایل APK ساخته شده به ریشه اصلی برای آپلود راحت‌تر
+        # ساخت فایل نصب با استفاده از گرادل نصب شده روی سیستم گیت‌هاب
+        gradle assembleDebug --no-daemon
+
+        # جمع‌آوری و جابه‌جایی فایل خروجی برای آپلود
         mkdir -p $GITHUB_WORKSPACE/output_apk
         cp app/build/outputs/apk/debug/app-debug.apk $GITHUB_WORKSPACE/output_apk/CandleMaster.apk
 
