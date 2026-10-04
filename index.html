@@ -1,10 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سیستم یکپارچه توزیع NDN</title>
-    <link rel="icon" type="image/png" href="https://icons8.com">
+    <title>ط³غŒط³طھظ… غŒع©ظ¾ط§ط±ع†ظ‡ طھظˆط²غŒط¹ NDN</title>
+    <link rel="manifest" href="./app_manifest.json">
+    <meta name="theme-color" content="#E5B83B">
+    <link rel="icon" type="image/png" href="./icons/icon-192.png">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
     <style>
         :root {
             --bg-color: #121212;
@@ -44,70 +47,70 @@
 </head>
 <body>
 
-    <!-- نوار شبیه‌ساز نقش‌ها -->
+    <!-- ظ†ظˆط§ط± ط´ط¨غŒظ‡â€Œط³ط§ط² ظ†ظ‚ط´â€Œظ‡ط§ -->
     <div id="imp-banner" class="impersonation-banner">
-        ⚠️ نمای شبیه‌سازی شده کاربر: <span id="imp-user"></span>
-        <button style="margin-right:15px; cursor:pointer; font-weight:bold; padding:4px 10px; border-radius:4px; border:none;" onclick="exitImp()">بازگشت به ادمین</button>
+        âڑ ï¸ڈ ظ†ظ…ط§غŒ ط´ط¨غŒظ‡â€Œط³ط§ط²غŒ ط´ط¯ظ‡ ع©ط§ط±ط¨ط±: <span id="imp-user"></span>
+        <button style="margin-right:15px; cursor:pointer; font-weight:bold; padding:4px 10px; border-radius:4px; border:none;" onclick="exitImp()">ط¨ط§ط²ع¯ط´طھ ط¨ظ‡ ط§ط¯ظ…غŒظ†</button>
     </div>
 
-    <!-- داشبورد اصلی -->
+    <!-- ط¯ط§ط´ط¨ظˆط±ط¯ ط§طµظ„غŒ -->
     <div id="dash-block" class="dashboard">
         <div class="nav-bar">
-            <h3 style="margin:0;">پنل مدیریت شبکه توزیع NDN <span id="role-txt" style="font-size:12px; background:#9b59b6; padding:3px 8px; border-radius:4px; color:white;">ادمین سیستم</span></h3>
-            <span style="font-size:13px; color:var(--accent); font-weight:bold;">وضعیت: ادمین کل</span>
+            <h3 style="margin:0;">ظ¾ظ†ظ„ ظ…ط¯غŒط±غŒطھ ط´ط¨ع©ظ‡ طھظˆط²غŒط¹ NDN <span id="role-txt" style="font-size:12px; background:#9b59b6; padding:3px 8px; border-radius:4px; color:white;">ط§ط¯ظ…غŒظ† ط³غŒط³طھظ…</span></h3>
+            <span style="font-size:13px; color:var(--accent); font-weight:bold;">ظˆط¶ط¹غŒطھ: ط§ط¯ظ…غŒظ† ع©ظ„</span>
         </div>
         
         <div id="admin-tools" class="grid">
             <div class="sub-card">
-                <h4 style="color:var(--accent); margin:0 0 15px 0;">ثبت بارنامه جدید در سوپابیس</h4>
+                <h4 style="color:var(--accent); margin:0 0 15px 0;">ط«ط¨طھ ط¨ط§ط±ظ†ط§ظ…ظ‡ ط¬ط¯غŒط¯ ط¯ط± ط³ظˆظ¾ط§ط¨غŒط³</h4>
                 <div class="form-group">
-                    <label>نام فرستنده</label>
-                    <input type="text" id="db-sender" placeholder="مثال: فروشگاه شمع CandleMaster">
+                    <label>ظ†ط§ظ… ظپط±ط³طھظ†ط¯ظ‡</label>
+                    <input type="text" id="db-sender" placeholder="ظ…ط«ط§ظ„: ظپط±ظˆط´ع¯ط§ظ‡ ط´ظ…ط¹ CandleMaster">
                 </div>
                 <div class="form-group">
-                    <label>نام گیرنده (مشتری)</label>
-                    <input type="text" id="db-customer" placeholder="مثال: رضا قاسمی">
+                    <label>ظ†ط§ظ… ع¯غŒط±ظ†ط¯ظ‡ (ظ…ط´طھط±غŒ)</label>
+                    <input type="text" id="db-customer" placeholder="ظ…ط«ط§ظ„: ط±ط¶ط§ ظ‚ط§ط³ظ…غŒ">
                 </div>
-                <button class="btn" id="submit-btn" onclick="sendDataToSupabase()">صدور و ذخیره قطعی در دیتابیس</button>
+                <button class="btn" id="submit-btn" onclick="sendDataToSupabase()">طµط¯ظˆط± ظˆ ط°ط®غŒط±ظ‡ ظ‚ط·ط¹غŒ ط¯ط± ط¯غŒطھط§ط¨غŒط³</button>
                 <div id="db-alert" style="margin-top:10px; font-size:13px; text-align:center;"></div>
             </div>
 
             <div class="sub-card" style="border-right:4px solid #9b59b6;">
-                <h4 style="color:#9b59b6; margin:0 0 15px 0;">🛠️ ورود با نقش سایر کاربران (تست عملکرد)</h4>
+                <h4 style="color:#9b59b6; margin:0 0 15px 0;">ًں› ï¸ڈ ظˆط±ظˆط¯ ط¨ط§ ظ†ظ‚ط´ ط³ط§غŒط± ع©ط§ط±ط¨ط±ط§ظ† (طھط³طھ ط¹ظ…ظ„ع©ط±ط¯)</h4>
                 <div class="form-group">
-                    <label>انتخاب حساب کاربری هدف جهت عیب‌یابی</label>
+                    <label>ط§ظ†طھط®ط§ط¨ ط­ط³ط§ط¨ ع©ط§ط±ط¨ط±غŒ ظ‡ط¯ظپ ط¬ظ‡طھ ط¹غŒط¨â€ŒغŒط§ط¨غŒ</label>
                     <select id="imp-select">
-                        <option value="driver">راننده توزیع (driver1@ndn.com)</option>
-                        <option value="customer">مشتری نهایی (customer@gmail.com)</option>
+                        <option value="driver">ط±ط§ظ†ظ†ط¯ظ‡ طھظˆط²غŒط¹ (driver1@ndn.com)</option>
+                        <option value="customer">ظ…ط´طھط±غŒ ظ†ظ‡ط§غŒغŒ (customer@gmail.com)</option>
                     </select>
                 </div>
-                <button class="btn" style="background:#9b59b6; color:white;" onclick="goImp()">🚀 سوئیچ آنی به ویو کاربر</button>
-                <p style="font-size: 13px; margin-top:15px; color:var(--text-muted);">رکوردهای زنده دیتابیس سوپابیس: <b id="live-count" style="color:var(--accent)">0</b></p>
+                <button class="btn" style="background:#9b59b6; color:white;" onclick="goImp()">ًںڑ€ ط³ظˆط¦غŒع† ط¢ظ†غŒ ط¨ظ‡ ظˆغŒظˆ ع©ط§ط±ط¨ط±</button>
+                <p style="font-size: 13px; margin-top:15px; color:var(--text-muted);">ط±ع©ظˆط±ط¯ظ‡ط§غŒ ط²ظ†ط¯ظ‡ ط¯غŒطھط§ط¨غŒط³ ط³ظˆظ¾ط§ط¨غŒط³: <b id="live-count" style="color:var(--accent)">0</b></p>
             </div>
         </div>
 
-        <!-- ویو پیک -->
+        <!-- ظˆغŒظˆ ظ¾غŒع© -->
         <div id="driver-view" style="display:none;" class="sub-card">
-            <h4 style="color:#3498db; margin:0 0 15px 0;">لیست ماموریت‌های پیک خط</h4>
-            <p style="font-size:14px; margin-bottom:15px;">وضعیت بسته فرضی: TRK-10023</p>
-            <button class="btn" style="width:auto; padding:8px 15px; background:#3498db; color:white;" onclick="alert('وضعیت به تحویل شده تغییر یافت.')">تایید تحویل مرسوله به مشتری</button>
+            <h4 style="color:#3498db; margin:0 0 15px 0;">ظ„غŒط³طھ ظ…ط§ظ…ظˆط±غŒطھâ€Œظ‡ط§غŒ ظ¾غŒع© ط®ط·</h4>
+            <p style="font-size:14px; margin-bottom:15px;">ظˆط¶ط¹غŒطھ ط¨ط³طھظ‡ ظپط±ط¶غŒ: TRK-10023</p>
+            <button class="btn" style="width:auto; padding:8px 15px; background:#3498db; color:white;" onclick="alert('ظˆط¶ط¹غŒطھ ط¨ظ‡ طھط­ظˆغŒظ„ ط´ط¯ظ‡ طھط؛غŒغŒط± غŒط§ظپطھ.')">طھط§غŒغŒط¯ طھط­ظˆغŒظ„ ظ…ط±ط³ظˆظ„ظ‡ ط¨ظ‡ ظ…ط´طھط±غŒ</button>
         </div>
 
-        <!-- ویو مشتری -->
+        <!-- ظˆغŒظˆ ظ…ط´طھط±غŒ -->
         <div id="customer-view" style="display:none;" class="sub-card">
-            <h4 style="color:#2ecc71; margin:0 0 15px 0;">پیگیری بسته خریدار</h4>
+            <h4 style="color:#2ecc71; margin:0 0 15px 0;">ظ¾غŒع¯غŒط±غŒ ط¨ط³طھظ‡ ط®ط±غŒط¯ط§ط±</h4>
             <div class="form-group">
-                <label>کد رهگیری بارنامه</label>
-                <input type="text" placeholder="مثال: TRK-1234">
+                <label>ع©ط¯ ط±ظ‡ع¯غŒط±غŒ ط¨ط§ط±ظ†ط§ظ…ظ‡</label>
+                <input type="text" placeholder="ظ…ط«ط§ظ„: TRK-1234">
             </div>
-            <button class="btn" style="background:#2ecc71; color:black;" onclick="alert('اتصال زنده به سیستم رهگیری برقرار است.')">جستجو</button>
+            <button class="btn" style="background:#2ecc71; color:black;" onclick="alert('ط§طھطµط§ظ„ ط²ظ†ط¯ظ‡ ط¨ظ‡ ط³غŒط³طھظ… ط±ظ‡ع¯غŒط±غŒ ط¨ط±ظ‚ط±ط§ط± ط§ط³طھ.')">ط¬ط³طھط¬ظˆ</button>
         </div>
     </div>
 
     <script>
-        const BACKEND_URL = 'https://onrender.com';
+        const BACKEND_URL = 'https://candlemaster-android.onrender.com';
 
-        // دریافت آمار زنده از دیتابیس
+        // ط¯ط±غŒط§ظپطھ ط¢ظ…ط§ط± ط²ظ†ط¯ظ‡ ط§ط² ط¯غŒطھط§ط¨غŒط³
         async function getLiveCount() {
             try {
                 const response = await fetch(BACKEND_URL);
@@ -121,7 +124,7 @@
         }
         getLiveCount();
 
-        // ثبت واقعی سفارش در سوپابیس از طریق سرور رندر
+        // ط«ط¨طھ ظˆط§ظ‚ط¹غŒ ط³ظپط§ط±ط´ ط¯ط± ط³ظˆظ¾ط§ط¨غŒط³ ط§ط² ط·ط±غŒظ‚ ط³ط±ظˆط± ط±ظ†ط¯ط±
         async function sendDataToSupabase() {
             var sender = document.getElementById('db-sender').value.trim();
             var customer = document.getElementById('db-customer').value.trim();
@@ -129,13 +132,13 @@
             var submitBtn = document.getElementById('submit-btn');
 
             if(!sender || !customer) {
-                alert('لطفا مشخصات فرستنده و گیرنده را پر کنید.');
+                alert('ظ„ط·ظپط§ ظ…ط´ط®طµط§طھ ظپط±ط³طھظ†ط¯ظ‡ ظˆ ع¯غŒط±ظ†ط¯ظ‡ ط±ط§ ظ¾ط± ع©ظ†غŒط¯.');
                 return;
             }
 
             submitBtn.disabled = true;
             alertBox.style.color = '#E5B83B';
-            alertBox.innerHTML = '⏳ در حال ثبت بارنامه در دیتابیس سوپابیس...';
+            alertBox.innerHTML = 'âڈ³ ط¯ط± ط­ط§ظ„ ط«ط¨طھ ط¨ط§ط±ظ†ط§ظ…ظ‡ ط¯ط± ط¯غŒطھط§ط¨غŒط³ ط³ظˆظ¾ط§ط¨غŒط³...';
 
             try {
                 const response = await fetch(`${BACKEND_URL}/api/deliveries`, {
@@ -148,17 +151,17 @@
                 
                 if(result.success) {
                     alertBox.style.color = 'var(--success)';
-                    alertBox.innerHTML = `✅ بارنامه ثبت شد! کد رهگیری: <b style="color:white">${result.trackingId}</b>`;
+                    alertBox.innerHTML = `âœ… ط¨ط§ط±ظ†ط§ظ…ظ‡ ط«ط¨طھ ط´ط¯! ع©ط¯ ط±ظ‡ع¯غŒط±غŒ: <b style="color:white">${result.trackingId}</b>`;
                     document.getElementById('db-sender').value = '';
                     document.getElementById('db-customer').value = '';
-                    getLiveCount(); // بروزرسانی آمار زنده
+                    getLiveCount(); // ط¨ط±ظˆط²ط±ط³ط§ظ†غŒ ط¢ظ…ط§ط± ط²ظ†ط¯ظ‡
                 } else {
                     alertBox.style.color = 'var(--error)';
-                    alertBox.innerHTML = '❌ خطا: ' + result.message;
+                    alertBox.innerHTML = 'â‌Œ ط®ط·ط§: ' + result.message;
                 }
             } catch (err) {
                 alertBox.style.color = 'var(--error)';
-                alertBox.innerHTML = '❌ خطا در ارتباط با شبکه توزیع.';
+                alertBox.innerHTML = 'â‌Œ ط®ط·ط§ ط¯ط± ط§ط±طھط¨ط§ط· ط¨ط§ ط´ط¨ع©ظ‡ طھظˆط²غŒط¹.';
             } finally {
                 submitBtn.disabled = false;
             }
@@ -167,7 +170,7 @@
         function goImp() {
             var role = document.getElementById('imp-select').value;
             document.getElementById('imp-banner').style.display = 'block';
-            document.getElementById('imp-user').innerText = role === 'driver' ? 'راننده' : 'مشتری';
+            document.getElementById('imp-user').innerText = role === 'driver' ? 'ط±ط§ظ†ظ†ط¯ظ‡' : 'ظ…ط´طھط±غŒ';
             
             document.getElementById('admin-tools').style.display = 'none';
             document.getElementById('driver-view').style.display = role === 'driver' ? 'block' : 'none';
@@ -181,5 +184,26 @@
             document.getElementById('customer-view').style.display = 'none';
         }
     </script>
+<script>
+    // NDN PWA Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('./sw.js', { scope: './' })
+                .then(function (registration) {
+                    console.log(
+                        'NDN PWA Service Worker registered:',
+                        registration.scope
+                    );
+                })
+                .catch(function (error) {
+                    console.error(
+                        'NDN PWA Service Worker registration failed:',
+                        error
+                    );
+                });
+        });
+    }
+</script>
 </body>
 </html>
+
