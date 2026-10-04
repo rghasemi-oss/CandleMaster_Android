@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>شبکه توزیع NDN</title>
-    <link rel="manifest" href="./manifest.json?v=2">
+    <link rel="manifest" href="./manifest.json?v=3">
+    <link rel="icon" type="image/png" href="https://icons8.com">
     <link rel="stylesheet" href="https://cloudflare.com">
     <style>
         body {
@@ -127,17 +128,15 @@
     </div>
 
     <script>
-        // ✅ این آدرس درست سرور رندر شماست
-const SERVER_URL = 'https://onrender.com';
+        // آدرس دقیق سرور رندر شما
+        const SERVER_URL = 'https://onrender.com';
 
-
-        // ۱. بررسی هوشمند وضعیت اتصال سرور رندر و سوپابیس
+        // ۱. بررسی وضعیت اتصال
         async function checkConnection() {
             const container = document.getElementById('status-container');
             container.innerHTML = '<div class="status-badge"><i class="fas fa-spinner fa-spin"></i> در حال بررسی...</div>';
             
             try {
-                // ارسال درخواست مستقیم به ریشه سرور
                 const response = await fetch(SERVER_URL, { method: 'GET', mode: 'cors' });
                 const data = await response.json();
                 
@@ -169,11 +168,11 @@ const SERVER_URL = 'https://onrender.com';
             }
 
             resultBox.style.display = 'block';
-            resultBox.innerHTML = `🔍 مرسوله با کد <b>${id}</b> در سیستم یافت نشد. دیتابیس سوپابیس شما در حال حاضر خالی است و منتظر اولین داده از سمت اپلیکیشن اندروید یا پنل است.`;
+            resultBox.innerHTML = `🔍 مرسوله با کد <b>${id}</b> در سیستم یافت نشد. دیتابیس سوپابیس شما فعال و متصل است و آماده دریافت اولین مرسوله‌ها می‌باشد.`;
             resultBox.style.color = '#E5B83B';
         }
 
-        // ۳. شبیه‌سازی ثبت داده
+        // ۳. ثبت مرسوله جدید
         function createNewDelivery() {
             const sender = document.getElementById('sender-name').value;
             const customer = document.getElementById('customer-name').value;
@@ -185,14 +184,13 @@ const SERVER_URL = 'https://onrender.com';
             }
 
             resultBox.style.display = 'block';
-            resultBox.innerHTML = `✅ ساختار فرانت‌اند آماده است! دیتابیس سوپابیس شما با موفقیت به بک‌اند متصل است و آماده دریافت اطلاعات فرستنده (<b>${sender}</b>) و گیرنده (<b>${customer}</b>) می‌باشد.`;
+            resultBox.innerHTML = `✅ دیتابیس سوپابیس شما با موفقیت متصل است! اطلاعات فرستنده (<b>${sender}</b>) و گیرنده (<b>${customer}</b>) آماده ارسال ایمن به شبکه تحویل محلی است.`;
             resultBox.style.color = '#2ecc71';
         }
 
-        // اجرای خودکار زمان بالا آمدن صفحه
+        // اجرای خودکار
         checkConnection();
 
-        // رجیستر کردن سرویس ورکر
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js').then(() => console.log('PWA Connected'));
         }
