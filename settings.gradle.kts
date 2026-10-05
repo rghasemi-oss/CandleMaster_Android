@@ -11,6 +11,10 @@ pluginManagement {
         "com.android.application" -> {
           useModule("com.android.tools.build:gradle:9.1.1")
         }
+
+        "com.google.android.libraries.mapsplatform.secrets-gradle-plugin" -> {
+          useModule("com.google.android.libraries.mapsplatform.secrets-gradle-plugin:2.0.1")
+        }
       }
     }
   }
