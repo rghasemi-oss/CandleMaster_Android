@@ -84,7 +84,7 @@ fun AdminPanelScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Quick Panel Access Row
-            Text("دسترسی سریع به پنل‌ها (اتصال واقعی Supabase / Render)", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            Text("دسترسی سریع به پنل‌ها (اتصال واقعی Backend API / Render)", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -140,7 +140,7 @@ fun AdminPanelScreen(
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("Supabase", color = goldColor, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                        Text("Backend API", color = goldColor, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         Spacer(modifier = Modifier.height(4.dp))
                         Text("ارتباط ابری", color = Color.Gray, fontSize = 11.sp)
                     }
@@ -177,7 +177,7 @@ fun AdminPanelScreen(
                 singleLine = true
             )
 
-            Text("مدیریت جامع پایگاه داده (Supabase & Render)", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+            Text("مدیریت جامع پایگاه داده (Backend API & Render)", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
 
             // Deliveries List
             LazyColumn(

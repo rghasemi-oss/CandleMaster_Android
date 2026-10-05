@@ -31,9 +31,6 @@ fun SettingsScreen(
     val configPrefs = remember { ConfigPreferences(context) }
     val themePreferences = remember { ThemePreferences(context) }
     val coroutineScope = rememberCoroutineScope()
-
-    var supabaseUrl by remember { mutableStateOf(configPrefs.supabaseUrl) }
-    var supabaseKey by remember { mutableStateOf(configPrefs.supabaseKey) }
     var renderUrl by remember { mutableStateOf(configPrefs.renderBackendUrl) }
     var showSavedMessage by remember { mutableStateOf(false) }
 
@@ -118,30 +115,13 @@ fun SettingsScreen(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Icon(Icons.Default.Cloud, contentDescription = null, tint = goldColor)
-                        Text("پیکربندی اتصال واقعی (Supabase & Render)", color = goldColor, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        Text("پیکربندی اتصال واقعی (Backend API / Render)", color = goldColor, fontWeight = FontWeight.Bold, fontSize = 14.sp)
                     }
                     Text(
-                        "لطفاً آدرس پروژه Supabase، کلید Anon و آدرس سرور مستقر شده روی Render.com را وارد کنید.",
+                        "لطفاً آدرس Backend API مستقر شده روی Render.com را وارد کنید.",
                         color = Color.Gray,
                         fontSize = 12.sp
                     )
-
-                    OutlinedTextField(
-                        value = supabaseUrl,
-                        onValueChange = { supabaseUrl = it },
-                        label = { Text("Supabase Project URL") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-
-                    OutlinedTextField(
-                        value = supabaseKey,
-                        onValueChange = { supabaseKey = it },
-                        label = { Text("Supabase Anon / API Key") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-
                     OutlinedTextField(
                         value = renderUrl,
                         onValueChange = { renderUrl = it },
@@ -152,8 +132,6 @@ fun SettingsScreen(
 
                     Button(
                         onClick = {
-                            configPrefs.supabaseUrl = supabaseUrl
-                            configPrefs.supabaseKey = supabaseKey
                             configPrefs.renderBackendUrl = renderUrl
                             showSavedMessage = true
                         },
