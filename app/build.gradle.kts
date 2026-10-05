@@ -3,10 +3,10 @@ import com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesS
 plugins {
   id("com.android.application")
   alias(libs.plugins.kotlin.compose)
-  alias(libs.plugins.google.devtools.ksp
+  alias(libs.plugins.google.devtools.ksp)
   id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
   alias(libs.plugins.google.services)
-  kotlin("plugin.serialization") version "2.1.0"
+  alias(libs.plugins.kotlin.serialization)
 }
 
 android {
