@@ -7,16 +7,22 @@ pluginManagement {
 
   resolutionStrategy {
     eachPlugin {
-      if (requested.id.id == "com.android.application") {
-        useModule("com.android.tools.build:gradle:${requested.version}")
+      when (requested.id.id) {
+        "com.android.application" -> {
+          useModule("com.android.tools.build:gradle:9.1.1")
+        }
       }
     }
   }
 }
-plugins { id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0" }
+
+plugins {
+  id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
 
 dependencyResolutionManagement {
   repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+
   repositories {
     google()
     mavenCentral()
