@@ -5,6 +5,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.*
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -41,7 +46,12 @@ class MainActivity : ComponentActivity() {
                     currentScreen = NdnScreen.LOGIN
                 }
 
-                when (currentScreen) {
+                Box(
+                    modifier = androidx.compose.ui.Modifier
+                        .fillMaxSize()
+                        .windowInsetsPadding(WindowInsets.safeDrawing)
+                ) {
+                    when (currentScreen) {
                     NdnScreen.LOGIN -> LoginScreen(
                         onLoginSuccess = { panelType ->
                             currentScreen = when (panelType) {
@@ -87,6 +97,7 @@ class MainActivity : ComponentActivity() {
                     NdnScreen.SETTINGS -> SettingsScreen(
                         onBack = { currentScreen = NdnScreen.ADMIN_PANEL }
                     )
+                    }
                 }
             }
         }
