@@ -84,5 +84,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ steps.release_tag.outputs.tag }}
         run: |
-          gh release create "$RELEASE_TAG" \`r`n            release/CandleMaster.apk \`r`n            --repo "${{ github.repository }}" \`r`n            --title "CandleMaster $RELEASE_TAG" \`r`n            --generate-notes
+          gh release create "$RELEASE_TAG" \
+            release/CandleMaster.apk \
+            --repo "${{ github.repository }}" \
+            --title "CandleMaster $RELEASE_TAG" \
+            --generate-notes
+
 
