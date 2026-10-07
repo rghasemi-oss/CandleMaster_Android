@@ -1,0 +1,41 @@
+﻿<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Rounded-square background -->
+    <path
+        android:fillColor="#0B1F3A"
+        android:pathData="M18,6 L90,6 Q102,6 102,18 L102,90 Q102,102 90,102 L18,102 Q6,102 6,90 L6,18 Q6,6 18,6 Z" />
+
+    <!-- Teal accent -->
+    <path
+        android:fillColor="#14B8A6"
+        android:pathData="M16,82 C29,76 38,72 49,66 C61,59 72,48 91,28 L96,35 C80,56 67,68 53,76 C40,83 29,87 18,90 Z" />
+
+    <!-- Location pin -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,18 C39,18 27,30 27,45 C27,65 54,88 54,88 C54,88 81,65 81,45 C81,30 69,18 54,18 Z" />
+
+    <!-- Parcel -->
+    <path
+        android:fillColor="#0B1F3A"
+        android:pathData="M39,39 L54,32 L69,39 L69,56 L54,64 L39,56 Z" />
+
+    <!-- Parcel top -->
+    <path
+        android:fillColor="#14B8A6"
+        android:pathData="M39,39 L54,46 L69,39 L54,32 Z" />
+
+    <!-- Parcel center line -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M52,45 L56,45 L56,62 L52,62 Z" />
+
+    <!-- Parcel tape -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M52,35 L56,33 L56,43 L52,45 Z" />
+</vector>
