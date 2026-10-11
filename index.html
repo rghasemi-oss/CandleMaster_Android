@@ -65,7 +65,7 @@
 
   <section id="parcel-card" class="card hidden" aria-labelledby="parcel-title">
     <h2 id="parcel-title">۲. ثبت مرسوله</h2>
-    <p class="note">ثبت فقط با یکی از دو دلیل مجاز انجام می‌شود. برای ثبت، هاب واقعی را از فهرست بالا انتخاب کنید.</p>
+    <p class="note">انتخاب دلیل به‌تنهایی اثبات رضایت مشتری نیست. بک‌اند فعلاً درخواست ثبت را رد می‌کند و هیچ مرسوله‌ای ذخیره نمی‌شود؛ این محدودیت تا پیاده‌سازی اعتبارسنجی و ثبت سابقهٔ رضایت باقی می‌ماند.</p>
     <form id="parcel-form">
       <div class="field"><label>دلیل مجاز ثبت مرسوله</label>
         <div class="radio-line">
@@ -123,6 +123,9 @@
     let data = null;
     try { data = raw ? JSON.parse(raw) : null; } catch (_) { data = null; }
     if (!response.ok) {
+      if (response.status === 503 && path === '/parcels') {
+        throw new Error('ثبت مرسوله فعلاً غیرفعال است؛ سرور هنوز رضایت قابل‌راستی‌آزمایی مشتری را بررسی نمی‌کند و هیچ مرسوله‌ای ثبت نشده است.');
+      }
       const message = data && (data.message || data.error);
       throw new Error((Array.isArray(message) ? message.join('، ') : message) || ('خطای سرور: HTTP ' + response.status));
     }
@@ -143,7 +146,7 @@
     const isCourier = loggedIn && currentUser.role === 'COURIER';
     $('parcel-card').classList.toggle('hidden', !isCourier);
     $('role-notice').textContent = isCourier
-      ? 'نقش سفیر توسط سرور تأیید شده است. پس از انتخاب هاب می‌توانید مرسوله را ثبت کنید.'
+      ? 'نقش سفیر توسط سرور تأیید شده است؛ با این حال ثبت مرسوله تا فعال‌شدن اعتبارسنجی مستقل رضایت مشتری در بک‌اند موقتاً غیرفعال است.'
       : 'این حساب نقش سفیر ندارد. ثبت مرسوله فقط برای نقش COURIER مجاز است؛ نقش را از داخل رابط تغییر ندهید.';
     if (!isCourier) { selectedHubId = ''; $('selected-hub').textContent = 'برای ثبت مرسوله، ورود با حساب دارای نقش سفیر لازم است.'; }
   }
