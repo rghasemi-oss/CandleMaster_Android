@@ -1,0 +1,74 @@
+name: PWA Contract Static Check
+
+on:
+  pull_request:
+    paths:
+      - "index.html"
+      - "sw.js"
+      - ".github/workflows/pwa-contract-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pwa-static-check:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate PWA JavaScript and canonical API contract
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const vm = require('node:vm');
+
+          const html = fs.readFileSync('index.html', 'utf8');
+          const sw = fs.readFileSync('sw.js', 'utf8');
+          const scripts = [...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)].map((match) => match[1]);
+
+          if (scripts.length === 0) throw new Error('index.html has no inline application script');
+          for (const [index, script] of scripts.entries()) {
+            new vm.Script(script, { filename: `index.html:inline-script-${index + 1}` });
+          }
+          new vm.Script(sw, { filename: 'sw.js' });
+
+          const required = [
+            "'/auth/login'",
+            "'/hubs/nearby?'",
+            "'/parcels'",
+            'registration_reason',
+            'CUSTOMER_REQUEST',
+            'FAILED_HOME_DELIVERY',
+            'proposed_hub_id',
+            'recipient_phone',
+            'base_post_cost',
+          ];
+          for (const token of required) {
+            if (!html.includes(token)) throw new Error(`Missing canonical contract token: ${token}`);
+          }
+
+          for (const forbidden of ['/api/deliveries', 'totalRecords', 'function goImp', 'function exitImp']) {
+            if (html.includes(forbidden)) throw new Error(`Legacy/mock PWA behavior remains: ${forbidden}`);
+          }
+          if (/localStorage|sessionStorage/.test(html)) {
+            throw new Error('Authentication tokens or state must not be persisted in browser storage');
+          }
+          if (!/CACHE_NAME\\s*=\\s*['"]ndn-pwa-v4['"]/.test(sw)) {
+            throw new Error('Service worker cache version must be bumped when the PWA shell changes');
+          }
+          if (!sw.includes("url.pathname.includes('/v1/')")) {
+            throw new Error('Service worker must bypass API requests');
+          }
+
+          console.log('PASS: inline JavaScript and service worker syntax');
+          console.log('PASS: canonical login, nearby-hub and parcel DTO contract');
+          console.log('PASS: no legacy demo endpoints or persistent token storage');
+          NODE
