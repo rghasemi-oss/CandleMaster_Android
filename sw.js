@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'ndn-pwa-v3';
+const CACHE_NAME = 'ndn-pwa-v4';
 
 const STATIC_ASSETS = [
     './',
@@ -29,15 +29,11 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-
     const request = event.request;
     const url = new URL(request.url);
 
-    // Never cache API/backend requests.
-    if (
-        url.hostname === 'candlemaster-android.onrender.com' ||
-        request.method !== 'GET'
-    ) {
+    // Never cache API requests or mutations.
+    if (request.method !== 'GET' || url.pathname.includes('/v1/')) {
         return;
     }
 
@@ -48,13 +44,9 @@ self.addEventListener('fetch', event => {
 
     event.respondWith(
         caches.match(request).then(cachedResponse => {
-
-            if (cachedResponse) {
-                return cachedResponse;
-            }
+            if (cachedResponse) return cachedResponse;
 
             return fetch(request).then(networkResponse => {
-
                 if (
                     !networkResponse ||
                     networkResponse.status !== 200 ||
@@ -64,11 +56,7 @@ self.addEventListener('fetch', event => {
                 }
 
                 const responseClone = networkResponse.clone();
-
-                caches.open(CACHE_NAME).then(cache => {
-                    cache.put(request, responseClone);
-                });
-
+                caches.open(CACHE_NAME).then(cache => cache.put(request, responseClone));
                 return networkResponse;
             });
         })
