@@ -1,0 +1,2 @@
+Temporary GitHub Connector write-access verification.
+This file is intended to be deleted immediately.
