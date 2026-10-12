@@ -56,7 +56,7 @@ jobs:
             'recipient_phone',
             'base_post_cost',
             'parseApiBase',
-            "parsed.protocol === 'https:'",
+            "parsed.protocol !== 'https:'",
           ];
           const contract = html + consentHtml;
           for (const token of required) {
