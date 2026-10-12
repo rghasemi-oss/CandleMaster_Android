@@ -29,8 +29,8 @@ jobs:
           const consentHtml = fs.readFileSync('recipient-consent.html', 'utf8');
           const sw = fs.readFileSync('sw.js', 'utf8');
           const scripts = [
-            ...[...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)].map((match) => ({ name: 'index.html', source: match[1] })),
-            ...[...consentHtml.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)].map((match) => ({ name: 'recipient-consent.html', source: match[1] })),
+            ...[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map((match) => ({ name: 'index.html', source: match[1] })),
+            ...[...consentHtml.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map((match) => ({ name: 'recipient-consent.html', source: match[1] })),
           ];
 
           if (scripts.length < 2) throw new Error('PWA pages must include their application scripts');
@@ -41,6 +41,8 @@ jobs:
 
           const required = [
             "'/auth/login'",
+            "'/auth/send-otp'",
+            "'/auth/verify-otp'",
             "'/hubs/nearby?'",
             "'/parcels'",
             "'/parcels/failed-delivery-attempts'",
@@ -53,8 +55,9 @@ jobs:
             'recipient_phone',
             'base_post_cost',
           ];
+          const contract = html + consentHtml;
           for (const token of required) {
-            if (!html.includes(token)) throw new Error('Missing canonical contract token: ' + token);
+            if (!contract.includes(token)) throw new Error('Missing canonical contract token: ' + token);
           }
 
           for (const forbidden of ['/api/deliveries', 'totalRecords', 'function goImp', 'function exitImp']) {
@@ -63,7 +66,7 @@ jobs:
           if (/localStorage|sessionStorage/.test(html + consentHtml)) {
             throw new Error('Authentication tokens or state must not be persisted in browser storage');
           }
-          if (!/CACHE_NAME\s*=\s*['"]ndn-pwa-v4['"]/.test(sw)) {
+          if (!/CACHE_NAME\s*=\s*['"]ndn-pwa-v5['"]/.test(sw)) {
             throw new Error('Service worker cache version must be bumped when the PWA shell changes');
           }
           if (!sw.includes("url.pathname.includes('/v1/')")) {
