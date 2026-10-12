@@ -22,7 +22,7 @@
 <label for="new-password">گذرواژه جدید (حداقل ۱۰ نویسه)</label><input id="new-password" type="password" minlength="10" maxlength="72" autocomplete="new-password">
 <button id="register" class="secondary" type="button">ثبت‌نام مشتری جدید</button>
 <label for="api-base">نشانی پایه API</label><input id="api-base" type="url" placeholder="https://your-api.example.com" autocomplete="url">
-<label for="phone">شماره همراه گیرنده</label><input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09120000000">
+<label for="phone">شماره همراه گیرنده</label><input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09120000000" pattern="09[0-9]{9}" required>
 <button id="send" class="secondary" type="button">ارسال کد تأیید</button>
 <label for="otp">کد ۶ رقمی دریافتی</label><input id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}">
 <button id="verify" class="primary" type="button">تأیید و ورود مشتری</button>
@@ -86,7 +86,7 @@
         full_name: $('full-name').value.trim(),
         role: 'RECIPIENT'
       };
-      if (!body.username || body.password.length < 10 || !body.phone) throw new Error('نام کاربری، گذرواژه و شماره همراه را تکمیل کنید.');
+      if (!body.username || body.password.length < 10 || !/^09[0-9]{9}$/.test(body.phone)) throw new Error('نام کاربری، گذرواژه و شماره همراه ۱۱ رقمی با قالب 09 را تکمیل کنید.');
       await call('/auth/register', body, false);
       $('new-password').value = '';
       show('auth-status', 'حساب مشتری ساخته شد. اکنون درخواست ارسال OTP را بزنید تا شماره همراه را تأیید کنید.', 'success');
