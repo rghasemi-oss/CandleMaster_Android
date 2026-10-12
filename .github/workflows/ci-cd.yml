@@ -55,6 +55,8 @@ jobs:
             'proposed_hub_id',
             'recipient_phone',
             'base_post_cost',
+            'parseApiBase',
+            "parsed.protocol === 'https:'",
           ];
           const contract = html + consentHtml;
           for (const token of required) {
@@ -63,6 +65,12 @@ jobs:
 
           for (const forbidden of ['/api/deliveries', 'totalRecords', 'function goImp', 'function exitImp']) {
             if (html.includes(forbidden)) throw new Error('Legacy/mock PWA behavior remains: ' + forbidden);
+          }
+          if (/تا فعال‌شدن اعتبارسنجی مستقل رضایت مشتری/.test(html)) {
+            throw new Error('PWA contains stale copy claiming consent validation is not implemented');
+          }
+          if (!html.includes('HTTP فقط برای localhost مجاز است') || !consentHtml.includes('HTTP فقط برای localhost مجاز است')) {
+            throw new Error('Both PWA pages must reject non-HTTPS remote API origins');
           }
           if (/localStorage|sessionStorage/.test(html + consentHtml)) {
             throw new Error('Authentication tokens or state must not be persisted in browser storage');
