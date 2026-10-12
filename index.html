@@ -65,7 +65,7 @@
 
   <section id="parcel-card" class="card hidden" aria-labelledby="parcel-title">
     <h2 id="parcel-title">۲. ثبت مرسوله</h2>
-    <p class="note">انتخاب دلیل به‌تنهایی اثبات رضایت مشتری نیست. بک‌اند فعلاً درخواست ثبت را رد می‌کند و هیچ مرسوله‌ای ذخیره نمی‌شود؛ این محدودیت تا پیاده‌سازی اعتبارسنجی و ثبت سابقهٔ رضایت باقی می‌ماند.</p>
+    <p class="note">ثبت مرسوله فقط با شناسهٔ رضایت صادرشده از پنل مشتری ممکن است. برای تحویل ناموفق، ابتدا تلاش را ثبت کنید و شناسهٔ آن را به گیرنده بدهید تا پس از تأیید OTP صریحاً رضایت دهد.</p>
     <form id="parcel-form">
       <div class="field"><label>دلیل مجاز ثبت مرسوله</label>
         <div class="radio-line">
@@ -81,6 +81,7 @@
         <div class="field"><label for="weight">وزن (کیلوگرم، اختیاری)</label><input id="weight" type="number" min="0.01" step="0.01"></div>
       </div>
       <div class="field"><label for="recipient-address">نشانی گیرنده</label><textarea id="recipient-address" rows="2" required maxlength="500"></textarea></div>
+      <div class="field"><label for="consent-evidence-id">شناسهٔ رضایت تأییدشدهٔ گیرنده</label><input id="consent-evidence-id" required maxlength="36" autocomplete="off"></div>
       <div class="field"><label for="parcel-description">توضیحات (اختیاری)</label><input id="parcel-description" maxlength="500"></div>
       <div id="selected-hub" class="status">هنوز هابی انتخاب نشده است.</div>
       <button id="create-parcel" class="primary" type="submit">ثبت مرسوله در سرور</button>
@@ -237,6 +238,7 @@
     if (!reason) { status('parcel-status', 'دلیل مجاز ثبت را انتخاب کنید.', 'error'); return; }
     const payload = {
       registration_reason: reason.value,
+      consent_evidence_id: $("consent-evidence-id").value.trim(),
       tracking_code: $('tracking-code').value.trim(),
       recipient_phone: $('recipient-phone').value.trim(),
       recipient_name: $('recipient-name').value.trim(),
