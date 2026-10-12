@@ -67,7 +67,7 @@ jobs:
           if (/localStorage|sessionStorage/.test(html + consentHtml)) {
             throw new Error('Authentication tokens or state must not be persisted in browser storage');
           }
-          if (!/CACHE_NAME\s*=\s*['"]ndn-pwa-v5['"]/.test(sw)) {
+          if (!/CACHE_NAME\s*=\s*['"]ndn-pwa-v6['"]/.test(sw)) {
             throw new Error('Service worker cache version must be bumped when the PWA shell changes');
           }
           if (!sw.includes("url.pathname.includes('/v1/')")) {
