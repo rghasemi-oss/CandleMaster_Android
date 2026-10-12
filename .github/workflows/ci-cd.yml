@@ -7,6 +7,86 @@ on:
     branches: [ main ]
 
 jobs:
+  pwa-contract-check:
+    name: Validate PWA API contract
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Validate PWA scripts and canonical API contract
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const vm = require('node:vm');
+          const html = fs.readFileSync('index.html', 'utf8');
+          const consentHtml = fs.readFileSync('recipient-consent.html', 'utf8');
+          const sw = fs.readFileSync('sw.js', 'utf8');
+          const scripts = [
+            ...[...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map((match) => ({ name: 'index.html', source: match[1] })),
+            ...[...consentHtml.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)].map((match) => ({ name: 'recipient-consent.html', source: match[1] })),
+          ];
+
+          if (scripts.length < 2) throw new Error('PWA pages must include their application scripts');
+          for (const [index, script] of scripts.entries()) {
+            new vm.Script(script.source, { filename: script.name + ':inline-script-' + (index + 1) });
+          }
+          new vm.Script(sw, { filename: 'sw.js' });
+
+          const required = [
+            "'/auth/login'",
+            "'/auth/register'",
+            "'/auth/send-otp'",
+            "'/auth/verify-otp'",
+            "'/hubs/nearby?'",
+            "'/parcels'",
+            "'/parcels/failed-delivery-attempts'",
+            "'/recipient-consents'",
+            'consent_evidence_id',
+            'registration_reason',
+            'CUSTOMER_REQUEST',
+            'FAILED_HOME_DELIVERY',
+            'proposed_hub_id',
+            'recipient_phone',
+            'base_post_cost',
+            'parseApiBase',
+            "parsed.protocol !== 'https:'",
+          ];
+          const contract = html + consentHtml;
+          for (const token of required) {
+            if (!contract.includes(token)) throw new Error('Missing canonical contract token: ' + token);
+          }
+
+          for (const forbidden of ['/api/deliveries', 'totalRecords', 'function goImp', 'function exitImp']) {
+            if (html.includes(forbidden)) throw new Error('Legacy/mock PWA behavior remains: ' + forbidden);
+          }
+          if (/تا فعال‌شدن اعتبارسنجی مستقل رضایت مشتری/.test(html)) {
+            throw new Error('PWA contains stale copy claiming consent validation is not implemented');
+          }
+          if (!html.includes('HTTP فقط برای localhost مجاز است') || !consentHtml.includes('HTTP فقط برای localhost مجاز است')) {
+            throw new Error('Both PWA pages must reject non-HTTPS remote API origins');
+          }
+          if (/localStorage|sessionStorage/.test(html + consentHtml)) {
+            throw new Error('Authentication tokens or state must not be persisted in browser storage');
+          }
+          if (!/CACHE_NAME\s*=\s*['"]ndn-pwa-v6['"]/.test(sw)) {
+            throw new Error('Service worker cache version must be bumped when the PWA shell changes');
+          }
+          if (!sw.includes("url.pathname.includes('/v1/')")) {
+            throw new Error('Service worker must bypass API requests');
+          }
+
+          console.log('PASS: inline JavaScript and service worker syntax');
+          console.log('PASS: canonical login, nearby-hub, recipient consent and parcel DTO contracts');
+          console.log('PASS: no legacy demo endpoints or persistent token storage');
+          NODE
+
   build-android:
     name: Build & Test Android App
     runs-on: ubuntu-latest
