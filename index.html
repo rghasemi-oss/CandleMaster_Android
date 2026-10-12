@@ -82,6 +82,9 @@
       </div>
       <div class="field"><label for="recipient-address">نشانی گیرنده</label><textarea id="recipient-address" rows="2" required maxlength="500"></textarea></div>
       <div class="field"><label for="consent-evidence-id">شناسهٔ رضایت تأییدشدهٔ گیرنده</label><input id="consent-evidence-id" required maxlength="36" autocomplete="off"></div>
+      <div class="field"><label for="attempt-note">شرح تلاش ناموفق تحویل منزل</label><input id="attempt-note" maxlength="500" placeholder="شرح واقعی تلاش انجام‌شده"></div>
+      <button id="record-failed-attempt" class="secondary" type="button">ثبت تلاش ناموفق تحویل</button>
+      <div id="attempt-status" class="status" role="status" aria-live="polite"></div>
       <div class="field"><label for="parcel-description">توضیحات (اختیاری)</label><input id="parcel-description" maxlength="500"></div>
       <div id="selected-hub" class="status">هنوز هابی انتخاب نشده است.</div>
       <button id="create-parcel" class="primary" type="submit">ثبت مرسوله در سرور</button>
@@ -229,6 +232,19 @@
       const msg = error && error.code === 1 ? 'اجازهٔ دسترسی به موقعیت داده نشد.' : error && error.code === 3 ? 'زمان دریافت موقعیت تمام شد.' : error.message;
       status('hubs-status', msg, 'error');
     } finally { setBusy(button, false); }
+  });
+  $('record-failed-attempt').addEventListener('click', async () => {
+    if (!currentUser || currentUser.role !== 'COURIER') { status('attempt-status', 'ثبت تلاش فقط برای سفیر واردشده مجاز است.', 'error'); return; }
+    const tracking_code = $('tracking-code').value.trim();
+    const recipient_phone = $('recipient-phone').value.trim();
+    const attempt_note = $('attempt-note').value.trim();
+    if (tracking_code.length < 4 || !recipient_phone || attempt_note.length < 5) { status('attempt-status', 'کد رهگیری، شماره گیرنده و شرح واقعی حداقل ۵ نویسه‌ای را تکمیل کنید.', 'error'); return; }
+    const button = $('record-failed-attempt'); setBusy(button, true, 'در حال ثبت تلاش…');
+    try {
+      const result = await api('/parcels/failed-delivery-attempts', { method: 'POST', body: JSON.stringify({ tracking_code, recipient_phone, attempt_note }) });
+      status('attempt-status', 'تلاش ثبت شد. شناسه را برای گیرنده بفرستید: ' + result.id, 'success');
+    } catch (error) { status('attempt-status', error.message, 'error'); }
+    finally { setBusy(button, false); }
   });
   $('parcel-form').addEventListener('submit', async (event) => {
     event.preventDefault();
