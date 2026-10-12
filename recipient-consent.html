@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#d8ad36">
+<title>پودو | رضایت مشتری</title>
+<style>
+:root{color-scheme:dark;--bg:#111315;--panel:#1b1e21;--field:#252a2e;--line:#3b4146;--gold:#e5b83b;--text:#f6f7f8;--muted:#aeb5bb;--ok:#50d890;--bad:#ff7777}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.7;padding:18px}main{max-width:720px;margin:auto}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:16px 0}h1,h2{color:var(--gold);margin-top:0}label{display:block;color:var(--muted);margin:12px 0 5px}input,select{width:100%;padding:12px;border-radius:8px;border:1px solid var(--line);background:var(--field);color:var(--text);font:inherit}button{font:inherit;font-weight:700;border:0;border-radius:8px;padding:12px 16px;min-height:44px;cursor:pointer;margin-top:12px}.primary{background:var(--gold);color:#161616}.secondary{background:#343a3f;color:var(--text)}.status{white-space:pre-wrap;overflow-wrap:anywhere;background:#24292d;border-radius:8px;padding:10px;margin-top:12px}.error{color:var(--bad)}.success{color:var(--ok)}.hidden{display:none!important}.note{color:var(--muted);font-size:.9rem}a{color:var(--gold)}
+</style>
+</head>
+<body>
+<main>
+<h1>پودو | پنل رضایت مشتری</h1>
+<p class="note">برای ثبت رضایت، ابتدا مالکیت شماره همراه را با OTP تأیید کنید. رضایت به کد رهگیری و دلیل مشخص متصل می‌شود. کد OTP فقط به سرور ارسال می‌شود و در مرورگر ذخیره نمی‌شود.</p>
+<section class="card">
+<h2>۱. اتصال و تأیید شماره همراه</h2>
+<label for="api-base">نشانی پایه API</label><input id="api-base" type="url" placeholder="https://your-api.example.com" autocomplete="url">
+<label for="phone">شماره همراه گیرنده</label><input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09120000000">
+<button id="send" class="secondary" type="button">ارسال کد تأیید</button>
+<label for="otp">کد ۶ رقمی دریافتی</label><input id="otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}">
+<button id="verify" class="primary" type="button">تأیید و ورود مشتری</button>
+<div id="auth-status" class="status" role="status" aria-live="polite"></div>
+</section>
+<section id="consent-card" class="card hidden">
+<h2>۲. تأیید صریح رضایت PUDO</h2>
+<p class="note">با فشردن دکمه، تأیید می‌کنید که می‌خواهید همین مرسوله به فرایند PUDO هدایت شود. اگر تحویل درب منزل ناموفق بوده، شناسه تلاش ثبت‌شده توسط سفیر لازم است.</p>
+<label for="tracking">کد رهگیری پستی</label><input id="tracking" maxlength="100" autocomplete="off">
+<label for="reason">دلیل ثبت</label>
+<select id="reason"><option value="CUSTOMER_REQUEST">درخواست صریح خودم</option><option value="FAILED_HOME_DELIVERY">تحویل منزل ناموفق بوده و پذیرش PUDO را تأیید می‌کنم</option></select>
+<div id="attempt-wrap" class="hidden"><label for="attempt-id">شناسه تلاش ناموفق تحویل که سفیر ارائه کرده</label><input id="attempt-id" maxlength="36" autocomplete="off"></div>
+<button id="accept" class="primary" type="button">تأیید رضایت و صدور شناسه</button>
+<div id="consent-status" class="status" role="status" aria-live="polite"></div>
+</section>
+<p class="note"><a href="./index.html">بازگشت به پنل سفیر</a></p>
+</main>
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  let apiBase = '';
+  let accessToken = '';
+  function show(id, message, kind) {
+    $(id).textContent = message || '';
+    $(id).className = 'status' + (kind ? ' ' + kind : '');
+  }
+  function url(path) {
+    if (!apiBase) throw new Error('نشانی پایه API را وارد کنید.');
+    return apiBase.replace(/\/+$/, '') + '/v1' + path;
+  }
+  async function call(path, body, authenticated) {
+    let response;
+    try {
+      const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json' };
+      if (authenticated && accessToken) headers.Authorization = 'Bearer ' + accessToken;
+      response = await fetch(url(path), { method: 'POST', headers, body: JSON.stringify(body), mode: 'cors', credentials: 'omit' });
+    } catch (_) { throw new Error('اتصال به API برقرار نشد؛ نشانی، CORS و وضعیت شبکه را بررسی کنید.'); }
+    const raw = await response.text();
+    let data = null;
+    try { data = raw ? JSON.parse(raw) : null; } catch (_) {}
+    if (!response.ok) {
+      const message = data && data.message;
+      throw new Error((Array.isArray(message) ? message.join('، ') : message) || ('خطای HTTP ' + response.status));
+    }
+    return data;
+  }
+  $('reason').addEventListener('change', () => {
+    $('attempt-wrap').classList.toggle('hidden', $('reason').value !== 'FAILED_HOME_DELIVERY');
+  });
+  $('send').addEventListener('click', async () => {
+    const raw = $('api-base').value.trim();
+    try {
+      const parsed = new URL(raw);
+      if (!['https:', 'http:'].includes(parsed.protocol) || parsed.username || parsed.password || parsed.search || parsed.hash) throw new Error();
+      apiBase = parsed.origin + parsed.pathname.replace(/\/+$/, '');
+      await call('/auth/send-otp', { phone: $('phone').value.trim() }, false);
+      show('auth-status', 'درخواست ارسال کد انجام شد. اگر شماره قابلیت دریافت کد داشته باشد، پیامک ارسال می‌شود.', 'success');
+    } catch (error) { show('auth-status', error.message || 'نشانی API معتبر نیست.', 'error'); }
+  });
+  $('verify').addEventListener('click', async () => {
+    try {
+      const result = await call('/auth/verify-otp', { phone: $('phone').value.trim(), otp: $('otp').value.trim() }, false);
+      if (!result || typeof result.access_token !== 'string' || !result.user || result.user.role !== 'RECIPIENT' || !result.user.phone_verified_at) {
+        accessToken = '';
+        throw new Error('پاسخ سرور نشان نمی‌دهد شماره همراه و نقش مشتری تأیید شده باشند.');
+      }
+      accessToken = result.access_token;
+      $('consent-card').classList.remove('hidden');
+      $('phone').disabled = true;
+      $('otp').value = '';
+      show('auth-status', 'شماره همراه تأیید شد. اکنون کد رهگیری و دلیل را بررسی کنید.', 'success');
+    } catch (error) { accessToken = ''; $('consent-card').classList.add('hidden'); show('auth-status', error.message, 'error'); }
+  });
+  $('accept').addEventListener('click', async () => {
+    if (!accessToken) { show('consent-status', 'ابتدا شماره همراه را با OTP تأیید کنید.', 'error'); return; }
+    const body = { tracking_code: $('tracking').value.trim(), registration_reason: $('reason').value };
+    if (body.registration_reason === 'FAILED_HOME_DELIVERY') {
+      body.failed_delivery_attempt_id = $('attempt-id').value.trim();
+      if (!body.failed_delivery_attempt_id) { show('consent-status', 'برای این دلیل، شناسه تلاش ناموفق لازم است.', 'error'); return; }
+    }
+    try {
+      const result = await call('/recipient-consents', body, true);
+      show('consent-status', 'رضایت ثبت شد. این شناسه را به سفیر بدهید تا برای همین کد رهگیری استفاده کند:\n' + result.id + '\nاعتبار تا: ' + result.expires_at, 'success');
+    } catch (error) { show('consent-status', error.message, 'error'); }
+  });
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js', { scope: './' }).catch((error) => console.error('Service worker registration failed:', error)));
+  }
+})();
+</script>
+</body>
+</html>
