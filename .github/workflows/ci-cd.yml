@@ -41,6 +41,7 @@ jobs:
 
           const required = [
             "'/auth/login'",
+            "'/auth/register'",
             "'/auth/send-otp'",
             "'/auth/verify-otp'",
             "'/hubs/nearby?'",
