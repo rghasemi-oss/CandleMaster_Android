@@ -54,6 +54,17 @@
     if (!apiBase) throw new Error('نشانی پایه API را وارد کنید.');
     return apiBase.replace(/\/+$/, '') + '/v1' + path;
   }
+  function parseApiBase(raw) {
+    const parsed = new URL(raw);
+    const localHost = ['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname);
+    if (parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && localHost)) {
+      throw new Error('برای سرور راه دور HTTPS لازم است؛ HTTP فقط برای localhost مجاز است.');
+    }
+    if (parsed.username || parsed.password || parsed.search || parsed.hash) {
+      throw new Error('نشانی API معتبر نیست؛ اطلاعات ورود را داخل URL قرار ندهید.');
+    }
+    return parsed.origin + parsed.pathname.replace(/\/+$/, '');
+  }
   async function call(path, body, authenticated) {
     let response;
     try {
@@ -76,9 +87,7 @@
   $('register').addEventListener('click', async () => {
     try {
       const raw = $('api-base').value.trim();
-      const parsed = new URL(raw);
-      if (!['https:', 'http:'].includes(parsed.protocol) || parsed.username || parsed.password || parsed.search || parsed.hash) throw new Error('نشانی API معتبر نیست.');
-      apiBase = parsed.origin + parsed.pathname.replace(/\/+$/, '');
+      apiBase = parseApiBase(raw);
       const body = {
         username: $('username').value.trim(),
         password: $('new-password').value,
@@ -95,9 +104,7 @@
   $('send').addEventListener('click', async () => {
     const raw = $('api-base').value.trim();
     try {
-      const parsed = new URL(raw);
-      if (!['https:', 'http:'].includes(parsed.protocol) || parsed.username || parsed.password || parsed.search || parsed.hash) throw new Error();
-      apiBase = parsed.origin + parsed.pathname.replace(/\/+$/, '');
+      apiBase = parseApiBase(raw);
       await call('/auth/send-otp', { phone: $('phone').value.trim() }, false);
       show('auth-status', 'درخواست ارسال کد انجام شد. اگر شماره قابلیت دریافت کد داشته باشد، پیامک ارسال می‌شود.', 'success');
     } catch (error) { show('auth-status', error.message || 'نشانی API معتبر نیست.', 'error'); }
