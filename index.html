@@ -113,6 +113,17 @@
     if (!apiBase) throw new Error('ابتدا نشانی API را وارد و اعمال کنید.');
     return apiBase.replace(/\/+$/, '') + '/v1';
   }
+  function parseApiBase(raw) {
+    const parsed = new URL(raw);
+    const localHost = ['localhost', '127.0.0.1', '[::1]'].includes(parsed.hostname);
+    if (parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && localHost)) {
+      throw new Error('برای سرور راه دور HTTPS لازم است؛ HTTP فقط برای localhost مجاز است.');
+    }
+    if (parsed.username || parsed.password || parsed.search || parsed.hash) {
+      throw new Error('نشانی API معتبر نیست؛ اطلاعات ورود را داخل URL قرار ندهید.');
+    }
+    return parsed.origin + parsed.pathname.replace(/\/+$/, '');
+  }
   async function api(path, options = {}) {
     const headers = new Headers(options.headers || {});
     headers.set('Accept', 'application/json');
@@ -155,10 +166,7 @@
   $('save-api').addEventListener('click', () => {
     const raw = $('api-base').value.trim();
     try {
-      const parsed = new URL(raw);
-      if (!['https:', 'http:'].includes(parsed.protocol)) throw new Error();
-      if (parsed.username || parsed.password || parsed.search || parsed.hash) throw new Error();
-      apiBase = parsed.origin + parsed.pathname.replace(/\/+$/, '');
+      apiBase = parseApiBase(raw);
       status('config-status', 'نشانی API اعمال شد. اتصال واقعی هنگام ورود یا جست‌وجوی هاب آزمایش می‌شود.', 'success');
     } catch (_) {
       apiBase = '';
