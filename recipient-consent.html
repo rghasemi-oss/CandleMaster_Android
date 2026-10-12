@@ -16,6 +16,11 @@
 <p class="note">برای ثبت رضایت، ابتدا مالکیت شماره همراه را با OTP تأیید کنید. رضایت به کد رهگیری و دلیل مشخص متصل می‌شود. کد OTP فقط به سرور ارسال می‌شود و در مرورگر ذخیره نمی‌شود.</p>
 <section class="card">
 <h2>۱. اتصال و تأیید شماره همراه</h2>
+<p class="note">اگر حساب مشتری ندارید، ابتدا ثبت‌نام کنید؛ سپس با همان شماره همراه کد OTP بگیرید. ثبت‌نام به‌تنهایی شماره را تأیید نمی‌کند.</p>
+<label for="full-name">نام و نام خانوادگی</label><input id="full-name" maxlength="100" autocomplete="name">
+<label for="username">نام کاربری جدید</label><input id="username" minlength="3" maxlength="32" pattern="[A-Za-z0-9._-]{3,32}" autocomplete="username">
+<label for="new-password">گذرواژه جدید (حداقل ۱۰ نویسه)</label><input id="new-password" type="password" minlength="10" maxlength="72" autocomplete="new-password">
+<button id="register" class="secondary" type="button">ثبت‌نام مشتری جدید</button>
 <label for="api-base">نشانی پایه API</label><input id="api-base" type="url" placeholder="https://your-api.example.com" autocomplete="url">
 <label for="phone">شماره همراه گیرنده</label><input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="09120000000">
 <button id="send" class="secondary" type="button">ارسال کد تأیید</button>
@@ -67,6 +72,25 @@
   }
   $('reason').addEventListener('change', () => {
     $('attempt-wrap').classList.toggle('hidden', $('reason').value !== 'FAILED_HOME_DELIVERY');
+  });
+  $('register').addEventListener('click', async () => {
+    try {
+      const raw = $('api-base').value.trim();
+      const parsed = new URL(raw);
+      if (!['https:', 'http:'].includes(parsed.protocol) || parsed.username || parsed.password || parsed.search || parsed.hash) throw new Error('نشانی API معتبر نیست.');
+      apiBase = parsed.origin + parsed.pathname.replace(/\/+$/, '');
+      const body = {
+        username: $('username').value.trim(),
+        password: $('new-password').value,
+        phone: $('phone').value.trim(),
+        full_name: $('full-name').value.trim(),
+        role: 'RECIPIENT'
+      };
+      if (!body.username || body.password.length < 10 || !body.phone) throw new Error('نام کاربری، گذرواژه و شماره همراه را تکمیل کنید.');
+      await call('/auth/register', body, false);
+      $('new-password').value = '';
+      show('auth-status', 'حساب مشتری ساخته شد. اکنون درخواست ارسال OTP را بزنید تا شماره همراه را تأیید کنید.', 'success');
+    } catch (error) { show('auth-status', error.message, 'error'); }
   });
   $('send').addEventListener('click', async () => {
     const raw = $('api-base').value.trim();
