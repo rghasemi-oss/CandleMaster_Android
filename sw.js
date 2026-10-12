@@ -1,8 +1,9 @@
-const CACHE_NAME = 'ndn-pwa-v4';
+const CACHE_NAME = 'ndn-pwa-v5';
 
 const STATIC_ASSETS = [
     './',
     './index.html',
+    './recipient-consent.html',
     './app_manifest.json',
     './icons/icon-192.png',
     './icons/icon-512.png'
