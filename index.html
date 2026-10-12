@@ -128,9 +128,6 @@
     let data = null;
     try { data = raw ? JSON.parse(raw) : null; } catch (_) { data = null; }
     if (!response.ok) {
-      if (response.status === 503 && path === '/parcels') {
-        throw new Error('ثبت مرسوله فعلاً غیرفعال است؛ سرور هنوز رضایت قابل‌راستی‌آزمایی مشتری را بررسی نمی‌کند و هیچ مرسوله‌ای ثبت نشده است.');
-      }
       const message = data && (data.message || data.error);
       throw new Error((Array.isArray(message) ? message.join('، ') : message) || ('خطای سرور: HTTP ' + response.status));
     }
@@ -151,7 +148,7 @@
     const isCourier = loggedIn && currentUser.role === 'COURIER';
     $('parcel-card').classList.toggle('hidden', !isCourier);
     $('role-notice').textContent = isCourier
-      ? 'نقش سفیر توسط سرور تأیید شده است؛ با این حال ثبت مرسوله تا فعال‌شدن اعتبارسنجی مستقل رضایت مشتری در بک‌اند موقتاً غیرفعال است.'
+      ? 'نقش سفیر توسط سرور تأیید شده است. ثبت مرسوله به رضایت معتبر مشتری و هاب واجد شرایط نیاز دارد.'
       : 'این حساب نقش سفیر ندارد. ثبت مرسوله فقط برای نقش COURIER مجاز است؛ نقش را از داخل رابط تغییر ندهید.';
     if (!isCourier) { selectedHubId = ''; $('selected-hub').textContent = 'برای ثبت مرسوله، ورود با حساب دارای نقش سفیر لازم است.'; }
   }
