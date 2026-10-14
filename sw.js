@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ndn-pwa-v6';
+const CACHE_NAME = 'ndn-pwa-v7';
 
 const STATIC_ASSETS = [
     './',

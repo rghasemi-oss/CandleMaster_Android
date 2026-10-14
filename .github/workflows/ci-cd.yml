@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, feat/pudo-canonical-pwa-api ]
 
 jobs:
   pwa-contract-check:
@@ -41,6 +41,10 @@ jobs:
 
           const required = [
             "'/auth/login'",
+            "'/auth/assume-role'",
+            'admin-role-card',
+            'restore-admin-button',
+            'expires_in !== 900',
             "'/auth/register'",
             "'/auth/send-otp'",
             "'/auth/verify-otp'",
@@ -75,7 +79,7 @@ jobs:
           if (/localStorage|sessionStorage/.test(html + consentHtml)) {
             throw new Error('Authentication tokens or state must not be persisted in browser storage');
           }
-          if (!/CACHE_NAME\s*=\s*['"]ndn-pwa-v6['"]/.test(sw)) {
+          if (!/CACHE_NAME\s*=\s*['"]ndn-pwa-v7['"]/.test(sw)) {
             throw new Error('Service worker cache version must be bumped when the PWA shell changes');
           }
           if (!sw.includes("url.pathname.includes('/v1/')")) {
@@ -83,7 +87,7 @@ jobs:
           }
 
           console.log('PASS: inline JavaScript and service worker syntax');
-          console.log('PASS: canonical login, nearby-hub, recipient consent and parcel DTO contracts');
+          console.log('PASS: canonical login, audited admin role assumption, nearby-hub, recipient consent and parcel DTO contracts');
           console.log('PASS: no legacy demo endpoints or persistent token storage');
           NODE
 
