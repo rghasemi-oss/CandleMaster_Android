@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, feat/pudo-canonical-pwa-api ]
 
 jobs:
   pwa-contract-check:
