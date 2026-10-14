@@ -52,6 +52,26 @@
     <div id="role-notice" class="status" role="status"></div>
   </section>
 
+  <section id="admin-role-card" class="card hidden" aria-labelledby="admin-role-title">
+    <h2 id="admin-role-title">ابزار آزمایشی مدیر سیستم</h2>
+    <p class="note">این ابزار فقط برای حساب مدیر احراز هویت‌شده است. نقش‌گیری با API ثبت ممیزی می‌شود و توکن عملیاتی حداکثر ۱۵ دقیقه اعتبار دارد. نقش اصلی مدیر در سرور تغییر نمی‌کند.</p>
+    <div class="grid">
+      <div class="field"><label for="assumed-role">نقش موقت برای آزمایش</label>
+        <select id="assumed-role">
+          <option value="RECIPIENT">مشتری / گیرنده (RECIPIENT)</option>
+          <option value="COURIER">سفیر (COURIER)</option>
+          <option value="HUB_OWNER">مالک هاب (HUB_OWNER)</option>
+        </select>
+      </div>
+      <div class="field"><label for="assumption-reason">دلیل آزمایش (اختیاری)</label><input id="assumption-reason" maxlength="255" placeholder="مثلاً آزمون گردش‌کار PWA"></div>
+    </div>
+    <div class="actions">
+      <button id="assume-role-button" class="primary" type="button">ورود موقت به نقش انتخابی</button>
+      <button id="restore-admin-button" class="secondary hidden" type="button">بازگشت به حساب مدیر</button>
+    </div>
+    <div id="admin-role-status" class="status" role="status" aria-live="polite"></div>
+  </section>
+
   <section id="hubs-card" class="card hidden" aria-labelledby="hubs-title">
     <h2 id="hubs-title">۱. هاب‌های نزدیک</h2>
     <p class="note">موقعیت دستگاه فقط پس از فشردن دکمه و اجازهٔ شما دریافت می‌شود. فقط هاب‌هایی که مختصات واقعی دارند نمایش داده می‌شوند.</p>
@@ -103,6 +123,7 @@
   let currentUser = null;
   let hubs = [];
   let selectedHubId = '';
+  let adminSession = null;
 
   function status(id, message, type = '') {
     const el = $(id);
@@ -156,6 +177,10 @@
     $('session-card').classList.toggle('hidden', !loggedIn);
     $('hubs-card').classList.toggle('hidden', !loggedIn);
     $('session-summary').textContent = loggedIn ? ('کاربر: ' + (currentUser.username || currentUser.sub || '—') + ' | نقش سرور: ' + currentUser.role) : '';
+    const isAdmin = loggedIn && (currentUser.role === 'ADMIN' || currentUser.role === 'SUPER_ADMIN');
+    $('admin-role-card').classList.toggle('hidden', !(isAdmin || adminSession));
+    $('restore-admin-button').classList.toggle('hidden', !adminSession);
+    if (isAdmin && !adminSession) status('admin-role-status', 'حساب مدیر فعال است. نقش عملیاتی را فقط برای آزمایش کنترل‌شده انتخاب کنید.');
     const isCourier = loggedIn && currentUser.role === 'COURIER';
     $('parcel-card').classList.toggle('hidden', !isCourier);
     $('role-notice').textContent = isCourier
@@ -193,11 +218,54 @@
   });
   $('logout-button').addEventListener('click', () => {
     accessToken = ''; currentUser = null; hubs = []; selectedHubId = '';
+    adminSession = null;
     $('hub-list').replaceChildren();
     status('hubs-status', 'برای ادامه دوباره وارد شوید.');
     status('parcel-status', '');
     renderSession();
   });
+  $('assume-role-button').addEventListener('click', async () => {
+    if (!accessToken || !currentUser || !['ADMIN', 'SUPER_ADMIN'].includes(currentUser.role)) {
+      status('admin-role-status', 'برای این عملیات باید با حساب مدیر سیستم وارد شده باشید.', 'error');
+      return;
+    }
+    const button = $('assume-role-button');
+    setBusy(button, true, 'در حال ثبت نقش‌گیری…');
+    status('admin-role-status', 'در حال درخواست توکن موقت از API…');
+    try {
+      if (!adminSession) adminSession = { accessToken, user: currentUser };
+      const result = await api('/auth/assume-role', {
+        method: 'POST',
+        body: JSON.stringify({
+          role: $('assumed-role').value,
+          reason: $('assumption-reason').value.trim() || undefined
+        })
+      });
+      if (!result || typeof result.access_token !== 'string' || result.expires_in !== 900 ||
+          !['RECIPIENT', 'COURIER', 'HUB_OWNER'].includes(result.role) ||
+          !['ADMIN', 'SUPER_ADMIN'].includes(result.actor_role)) {
+        throw new Error('پاسخ نقش‌گیری با قرارداد امن مورد انتظار سازگار نیست.');
+      }
+      accessToken = result.access_token;
+      currentUser = { ...adminSession.user, role: result.role, actor_role: result.actor_role, role_assumption_id: result.role_assumption_id, is_role_assumption: true };
+      renderSession();
+      status('admin-role-status', 'نقش موقت ' + result.role + ' فعال شد. اعتبار توکن: ۱۵ دقیقه. شناسهٔ ممیزی: ' + result.role_assumption_id + '؛ برای بازگشت، دکمهٔ بازگشت به مدیر را بزنید.', 'success');
+      status('login-status', 'حالت آزمایش با نقش موقت فعال است؛ نشست مدیر فقط در حافظه نگه داشته شده است.');
+    } catch (error) {
+      renderSession();
+      status('admin-role-status', error.message, 'error');
+    } finally { setBusy(button, false); }
+  });
+
+  $('restore-admin-button').addEventListener('click', () => {
+    if (!adminSession) return;
+    accessToken = adminSession.accessToken;
+    currentUser = adminSession.user;
+    adminSession = null;
+    renderSession();
+    status('admin-role-status', 'به نشست مدیر بازگشتید. نقش اصلی مدیر در سرور تغییر نکرده بود.', 'success');
+  });
+
   $('find-hubs').addEventListener('click', async () => {
     if (!accessToken || !currentUser) { status('hubs-status', 'ابتدا وارد شوید.', 'error'); return; }
     if (!navigator.geolocation) { status('hubs-status', 'مرورگر از موقعیت جغرافیایی پشتیبانی نمی‌کند.', 'error'); return; }
